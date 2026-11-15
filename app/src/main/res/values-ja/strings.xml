@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MediaArchive</string>
+
+    <!-- Navigation & Common -->
+    <string name="common_back">戻る</string>
+    <string name="common_version_format">バージョン %1$s</string>
+
+    <!-- Home / Category List & Dialogs -->
+    <string name="category_list_title">カテゴリー</string>
+    <string name="category_default_name">Main</string>
+    <string name="category_mode_public">公開</string>
+    <string name="category_mode_private">非公開</string>
+    <string name="category_add_button">新規カテゴリー</string>
+    <string name="category_create_dialog_title">カテゴリーを作成</string>
+    <string name="category_name_label">カテゴリー名</string>
+    <string name="category_name_placeholder">例: 旅行、家族</string>
+    <string name="category_access_mode_label">公開設定</string>
+    <string name="category_password_label">パスワード</string>
+    <string name="category_password_placeholder">任意のパスワードを入力</string>
+    <string name="category_password_show">パスワードを表示</string>
+    <string name="category_password_hide">パスワードを隠す</string>
+    <string name="category_create_confirm">作成</string>
+    <string name="category_dialog_cancel">キャンセル</string>
+    <string name="category_error_blank_name">カテゴリー名を入力してください。</string>
+    <string name="category_error_duplicate_name">同じ名前のカテゴリーがすでに存在します。</string>
+    <string name="category_error_empty_password">非公開カテゴリーのパスワードを入力してください。</string>
+    <string name="category_error_generic">カテゴリーを作成できませんでした。もう一度お試しください。</string>
+
+    <string name="category_unlock_dialog_title">%1$s のロック解除</string>
+    <string name="category_unlock_dialog_subtitle">この非公開カテゴリーを開くにはパスワードを入力してください。</string>
+    <string name="category_unlock_confirm">ロック解除</string>
+    <string name="category_unlock_error_incorrect">パスワードが正しくありません。もう一度お試しください。</string>
+
+    <!-- Category Detail & SAF Browser -->
+    <string name="category_detail_tab_images">画像</string>
+    <string name="category_detail_tab_videos">動画</string>
+    <string name="category_detail_btn_browse_storage">ストレージを参照</string>
+    <string name="category_detail_browse_sheet_title">カテゴリーにメディアを追加</string>
+    <string name="category_detail_browse_files">画像 / 動画を選択</string>
+    <string name="category_detail_browse_files_desc">ストレージから1つ以上の画像や動画を選択します</string>
+    <string name="category_detail_browse_folder">フォルダを選択</string>
+    <string name="category_detail_browse_folder_desc">選択したフォルダ内のすべての画像と動画を取り込みます</string>
+    <string name="category_detail_empty_images">このカテゴリーにはまだ画像がありません。\n「ストレージを参照」をタップして追加してください。</string>
+    <string name="category_detail_empty_videos">このカテゴリーにはまだ動画がありません。\n「ストレージを参照」をタップして追加してください。</string>
+    <string name="category_detail_importing">メディアを取り込み、サムネイルを生成しています…</string>
+    <string name="category_detail_import_success">%1$d 件のメディアを追加しました。</string>
+    <string name="category_detail_import_empty">新しいメディアは追加されませんでした。</string>
+    <string name="category_detail_import_error">選択したメディアを取り込めませんでした。もう一度お試しください。</string>
+    <string name="category_detail_viewer_coming_soon">全画面ビューアーは次のフェーズで実装されます。</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">設定</string>
+    <string name="settings_theme_label">カラーテーマ</string>
+    <string name="settings_theme_neutral_taupe">ニュートラルトープ</string>
+    <string name="settings_theme_neutral_taupe_desc">白・黒・落ち着いたブラウングレー基調</string>
+    <string name="settings_theme_deep_crimson">ディープクリムゾン</string>
+    <string name="settings_theme_deep_crimson_desc">深みのあるダークレッド基調</string>
+    <string name="settings_theme_deep_forest">ディープフォレストグリーン</string>
+    <string name="settings_theme_deep_forest_desc">深みのあるエメラルド・パイングリーン基調</string>
+    <string name="settings_theme_deep_sapphire">ディープサファイアブルー</string>
+    <string name="settings_theme_deep_sapphire_desc">深みのあるネイビー・ミッドナイトブルー基調</string>
+
+    <string name="settings_appearance_label">外観モード</string>
+    <string name="settings_appearance_system">システム</string>
+    <string name="settings_appearance_light">ライト</string>
+    <string name="settings_appearance_dark">ダーク</string>
+
+    <string name="settings_language_label">言語</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_language_japanese">日本語</string>
+
+    <string name="settings_about_section_label">情報</string>
+    <string name="settings_about_item">MediaArchiveについて</string>
+    <string name="settings_about_item_subtitle">アプリの主な機能を確認</string>
+
+    <!-- About Screen (Strict HR-07: User-facing features only, no tech jargon) -->
+    <string name="about_title">アプリについて</string>
+    <string name="about_tagline">シンプルで集中できるメディア整理アプリ</string>
+    <string name="about_description">お気に入りの写真や動画を、目的に合わせたカテゴリーごとに整理して楽しめます。端末全体を自動スキャンすることなく、選んだファイルやフォルダだけを手動で追加できます。大切なコレクションはパスワード付きの非公開カテゴリーで安全に管理できます。</string>
+    <string name="about_feature_organize">写真と動画をカテゴリーごとに分かりやすく整理</string>
+    <string name="about_feature_manual">選んだファイルやフォルダだけを手動で追加</string>
+    <string name="about_feature_privacy">非公開カテゴリーをパスワードで保護</string>
+
+    <!-- Image Viewer & Video Player -->
+    <string name="viewer_index_counter">%1$d / %2$d</string>
+    <string name="image_viewer_empty">このカテゴリーに画像がありません</string>
+    <string name="video_player_empty">このカテゴリーに動画がありません</string>
+    <string name="video_player_previous">前の動画</string>
+    <string name="video_player_next">次の動画</string>
+    <string name="video_player_play">再生</string>
+    <string name="video_player_pause">一時停止</string>
+    <string name="media_file_missing_removed">「%1$s」が見つからないため一覧から削除しました。ファイルを再選択してください。</string>
+
+    <!-- Deletion & Playback Error -->
+    <string name="common_delete">削除</string>
+    <string name="category_delete_action">カテゴリーを削除</string>
+    <string name="category_delete_dialog_title">「%1$s」を削除しますか？</string>
+    <string name="category_delete_dialog_message">このカテゴリーとアーカイブされたメディア項目がMediaArchiveから削除されます。端末上の元のファイルは削除されません。</string>
+    <string name="category_delete_error">カテゴリーを削除できませんでした。もう一度お試しください。</string>
+    <string name="media_delete_action">メディアを削除</string>
+    <string name="media_delete_dialog_title">「%1$s」を削除しますか？</string>
+    <string name="media_delete_dialog_message">この項目をカテゴリーから削除します。端末上の元のファイルは削除されません。</string>
+    <string name="media_delete_success">「%1$s」を削除しました。</string>
+    <string name="media_delete_error">メディア項目を削除できませんでした。</string>
+    <string name="video_player_playback_error">「%1$s」を再生できません。</string>
+</resources>

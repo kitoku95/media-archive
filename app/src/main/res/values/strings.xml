@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MediaArchive</string>
+
+    <!-- Navigation & Common -->
+    <string name="common_back">Back</string>
+    <string name="common_version_format">Version %1$s</string>
+
+    <!-- Home / Category List & Dialogs -->
+    <string name="category_list_title">Categories</string>
+    <string name="category_default_name">Main</string>
+    <string name="category_mode_public">Public</string>
+    <string name="category_mode_private">Private</string>
+    <string name="category_add_button">New Category</string>
+    <string name="category_create_dialog_title">Create Category</string>
+    <string name="category_name_label">Category Name</string>
+    <string name="category_name_placeholder">e.g. Travel, Family</string>
+    <string name="category_access_mode_label">Access Mode</string>
+    <string name="category_password_label">Password</string>
+    <string name="category_password_placeholder">Enter any non-empty password</string>
+    <string name="category_password_show">Show password</string>
+    <string name="category_password_hide">Hide password</string>
+    <string name="category_create_confirm">Create</string>
+    <string name="category_dialog_cancel">Cancel</string>
+    <string name="category_error_blank_name">Category name cannot be empty.</string>
+    <string name="category_error_duplicate_name">A category with this name already exists.</string>
+    <string name="category_error_empty_password">Please enter a password for this private category.</string>
+    <string name="category_error_generic">Could not create category. Please try again.</string>
+
+    <string name="category_unlock_dialog_title">Unlock %1$s</string>
+    <string name="category_unlock_dialog_subtitle">Enter the password to open this private category.</string>
+    <string name="category_unlock_confirm">Unlock</string>
+    <string name="category_unlock_error_incorrect">Incorrect password. Please try again.</string>
+
+    <!-- Category Detail & SAF Browser -->
+    <string name="category_detail_tab_images">Images</string>
+    <string name="category_detail_tab_videos">Videos</string>
+    <string name="category_detail_btn_browse_storage">Browse Storage</string>
+    <string name="category_detail_browse_sheet_title">Add Media to Category</string>
+    <string name="category_detail_browse_files">Select Images / Videos</string>
+    <string name="category_detail_browse_files_desc">Pick one or more photos and videos from storage</string>
+    <string name="category_detail_browse_folder">Select Folder</string>
+    <string name="category_detail_browse_folder_desc">Import all photos and videos inside a chosen folder</string>
+    <string name="category_detail_empty_images">No images in this category yet.\nTap Browse Storage to add photos.</string>
+    <string name="category_detail_empty_videos">No videos in this category yet.\nTap Browse Storage to add videos.</string>
+    <string name="category_detail_importing">Importing media &amp; generating thumbnails…</string>
+    <string name="category_detail_import_success">Added %1$d media item(s).</string>
+    <string name="category_detail_import_empty">No new media items were added.</string>
+    <string name="category_detail_import_error">Could not import selected media. Please try again.</string>
+    <string name="category_detail_viewer_coming_soon">Full-screen viewer will be available in the next phase.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme_label">Color Theme</string>
+    <string name="settings_theme_neutral_taupe">Neutral Taupe</string>
+    <string name="settings_theme_neutral_taupe_desc">White, black, and warm brownish gray</string>
+    <string name="settings_theme_deep_crimson">Deep Crimson</string>
+    <string name="settings_theme_deep_crimson_desc">Rich dark crimson and burgundy tones</string>
+    <string name="settings_theme_deep_forest">Deep Forest Green</string>
+    <string name="settings_theme_deep_forest_desc">Deep emerald and pine green tones</string>
+    <string name="settings_theme_deep_sapphire">Deep Sapphire Blue</string>
+    <string name="settings_theme_deep_sapphire_desc">Deep navy and midnight blue tones</string>
+
+    <string name="settings_appearance_label">Appearance</string>
+    <string name="settings_appearance_system">System Default</string>
+    <string name="settings_appearance_light">Light</string>
+    <string name="settings_appearance_dark">Dark</string>
+
+    <string name="settings_language_label">Language</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_language_japanese">日本語</string>
+
+    <string name="settings_about_section_label">Information</string>
+    <string name="settings_about_item">About MediaArchive</string>
+    <string name="settings_about_item_subtitle">Learn what MediaArchive can do</string>
+
+    <!-- About Screen (Strict HR-07: User-facing features only, no tech jargon) -->
+    <string name="about_title">About</string>
+    <string name="about_tagline">Your personal, distraction-free media organizer</string>
+    <string name="about_description">Organize and enjoy your personal photos and videos in custom categories tailored to your needs. Add only the specific files or folders you choose without automatic background scanning. Keep sensitive collections protected in private categories with your own password.</string>
+    <string name="about_feature_organize">Organize photos and videos into dedicated categories</string>
+    <string name="about_feature_manual">Browse and add only the files or folders you select</string>
+    <string name="about_feature_privacy">Lock private categories with a personal password</string>
+
+    <!-- Image Viewer & Video Player -->
+    <string name="viewer_index_counter">%1$d / %2$d</string>
+    <string name="image_viewer_empty">No images in this category</string>
+    <string name="video_player_empty">No videos in this category</string>
+    <string name="video_player_previous">Previous video</string>
+    <string name="video_player_next">Next video</string>
+    <string name="video_player_play">Play</string>
+    <string name="video_player_pause">Pause</string>
+    <string name="media_file_missing_removed">\"%1$s\" no longer exists and was removed. Please re-select the file.</string>
+
+    <!-- Deletion & Playback Error -->
+    <string name="common_delete">Delete</string>
+    <string name="category_delete_action">Delete category</string>
+    <string name="category_delete_dialog_title">Delete %1$s?</string>
+    <string name="category_delete_dialog_message">This will remove the category and all archived media entries from MediaArchive. Your original files on device storage will not be deleted.</string>
+    <string name="category_delete_error">Could not delete category. Please try again.</string>
+    <string name="media_delete_action">Remove media</string>
+    <string name="media_delete_dialog_title">Remove %1$s?</string>
+    <string name="media_delete_dialog_message">This will remove the item from this category. Your original file on device storage will not be deleted.</string>
+    <string name="media_delete_success">Removed \"%1$s\".</string>
+    <string name="media_delete_error">Could not remove media item.</string>
+    <string name="video_player_playback_error">Unable to play \"%1$s\".</string>
+</resources>

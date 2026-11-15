@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MediaArchive</string>
+
+    <!-- Navigation & Common -->
+    <string name="common_back">Quay lại</string>
+    <string name="common_version_format">Phiên bản %1$s</string>
+
+    <!-- Home / Category List & Dialogs -->
+    <string name="category_list_title">Danh mục</string>
+    <string name="category_default_name">Main</string>
+    <string name="category_mode_public">Công khai</string>
+    <string name="category_mode_private">Riêng tư</string>
+    <string name="category_add_button">Tạo danh mục</string>
+    <string name="category_create_dialog_title">Tạo danh mục mới</string>
+    <string name="category_name_label">Tên danh mục</string>
+    <string name="category_name_placeholder">VD: Du lịch, Gia đình</string>
+    <string name="category_access_mode_label">Chế độ truy cập</string>
+    <string name="category_password_label">Mật khẩu</string>
+    <string name="category_password_placeholder">Nhập mật khẩu bất kỳ (không giới hạn độ dài)</string>
+    <string name="category_password_show">Hiện mật khẩu</string>
+    <string name="category_password_hide">Ẩn mật khẩu</string>
+    <string name="category_create_confirm">Tạo</string>
+    <string name="category_dialog_cancel">Hủy</string>
+    <string name="category_error_blank_name">Tên danh mục không được để trống.</string>
+    <string name="category_error_duplicate_name">Danh mục với tên này đã tồn tại.</string>
+    <string name="category_error_empty_password">Vui lòng nhập mật khẩu cho danh mục riêng tư.</string>
+    <string name="category_error_generic">Không thể tạo danh mục. Vui lòng thử lại.</string>
+
+    <string name="category_unlock_dialog_title">Mở khóa %1$s</string>
+    <string name="category_unlock_dialog_subtitle">Nhập mật khẩu để mở danh mục riêng tư này.</string>
+    <string name="category_unlock_confirm">Mở khóa</string>
+    <string name="category_unlock_error_incorrect">Mật khẩu không đúng. Vui lòng thử lại.</string>
+
+    <!-- Category Detail & SAF Browser -->
+    <string name="category_detail_tab_images">Ảnh</string>
+    <string name="category_detail_tab_videos">Video</string>
+    <string name="category_detail_btn_browse_storage">Duyệt bộ nhớ</string>
+    <string name="category_detail_browse_sheet_title">Thêm media vào danh mục</string>
+    <string name="category_detail_browse_files">Chọn Ảnh / Video</string>
+    <string name="category_detail_browse_files_desc">Chọn một hoặc nhiều ảnh và video từ bộ nhớ</string>
+    <string name="category_detail_browse_folder">Chọn Thư mục</string>
+    <string name="category_detail_browse_folder_desc">Nhập tất cả ảnh và video trong thư mục đã chọn</string>
+    <string name="category_detail_empty_images">Chưa có ảnh nào trong danh mục này.\nNhấn Duyệt bộ nhớ để thêm ảnh.</string>
+    <string name="category_detail_empty_videos">Chưa có video nào trong danh mục này.\nNhấn Duyệt bộ nhớ để thêm video.</string>
+    <string name="category_detail_importing">Đang nhập media &amp; tạo ảnh thu nhỏ…</string>
+    <string name="category_detail_import_success">Đã thêm %1$d mục media.</string>
+    <string name="category_detail_import_empty">Không có mục media mới nào được thêm.</string>
+    <string name="category_detail_import_error">Không thể nhập media đã chọn. Vui lòng thử lại.</string>
+    <string name="category_detail_viewer_coming_soon">Trình xem toàn màn hình sẽ có trong giai đoạn tiếp theo.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_theme_label">Tông màu giao diện</string>
+    <string name="settings_theme_neutral_taupe">Trung tính (Taupe)</string>
+    <string name="settings_theme_neutral_taupe_desc">Trắng, đen và xám nâu dịu mắt</string>
+    <string name="settings_theme_deep_crimson">Đỏ thẫm (Deep Crimson)</string>
+    <string name="settings_theme_deep_crimson_desc">Tông đỏ rượu vang đậm sang trọng</string>
+    <string name="settings_theme_deep_forest">Xanh rừng thẫm (Deep Forest)</string>
+    <string name="settings_theme_deep_forest_desc">Tông xanh lục bảo và xanh thông trầm</string>
+    <string name="settings_theme_deep_sapphire">Xanh sapphire (Deep Sapphire)</string>
+    <string name="settings_theme_deep_sapphire_desc">Tông xanh navy và xanh đêm sâu lắng</string>
+
+    <string name="settings_appearance_label">Chế độ hiển thị</string>
+    <string name="settings_appearance_system">Theo hệ thống</string>
+    <string name="settings_appearance_light">Sáng</string>
+    <string name="settings_appearance_dark">Tối</string>
+
+    <string name="settings_language_label">Ngôn ngữ</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_language_japanese">日本語</string>
+
+    <string name="settings_about_section_label">Thông tin</string>
+    <string name="settings_about_item">Giới thiệu MediaArchive</string>
+    <string name="settings_about_item_subtitle">Tìm hiểu các tính năng của ứng dụng</string>
+
+    <!-- About Screen (Strict HR-07: User-facing features only, no tech jargon) -->
+    <string name="about_title">Giới thiệu</string>
+    <string name="about_tagline">Không gian lưu trữ và xem ảnh, video gọn gàng</string>
+    <string name="about_description">Sắp xếp và thưởng thức ảnh, video cá nhân theo từng danh mục riêng biệt phù hợp với nhu cầu của bạn. Chỉ thêm những tệp hoặc thư mục bạn trực tiếp lựa chọn mà không tự động quét toàn bộ thiết bị. Bảo vệ các bộ sưu tập nhạy cảm trong danh mục riêng tư bằng mật khẩu của riêng bạn.</string>
+    <string name="about_feature_organize">Phân loại ảnh và video theo từng danh mục rõ ràng</string>
+    <string name="about_feature_manual">Chủ động chọn lọc từng tệp hoặc thư mục muốn thêm</string>
+    <string name="about_feature_privacy">Khóa các danh mục riêng tư bằng mật khẩu cá nhân</string>
+
+    <!-- Image Viewer & Video Player -->
+    <string name="viewer_index_counter">%1$d / %2$d</string>
+    <string name="image_viewer_empty">Chưa có ảnh nào trong danh mục này</string>
+    <string name="video_player_empty">Chưa có video nào trong danh mục này</string>
+    <string name="video_player_previous">Video trước</string>
+    <string name="video_player_next">Video tiếp theo</string>
+    <string name="video_player_play">Phát</string>
+    <string name="video_player_pause">Tạm dừng</string>
+    <string name="media_file_missing_removed">Tệp \"%1$s\" không còn tồn tại và đã được xóa khỏi danh mục. Vui lòng chọn lại tệp.</string>
+
+    <!-- Deletion & Playback Error -->
+    <string name="common_delete">Xóa</string>
+    <string name="category_delete_action">Xóa danh mục</string>
+    <string name="category_delete_dialog_title">Xóa danh mục %1$s?</string>
+    <string name="category_delete_dialog_message">Thao tác này sẽ xóa danh mục và toàn bộ mục đã lưu trong MediaArchive. Tệp gốc trên bộ nhớ thiết bị sẽ không bị xóa.</string>
+    <string name="category_delete_error">Không thể xóa danh mục. Vui lòng thử lại.</string>
+    <string name="media_delete_action">Xóa khỏi danh mục</string>
+    <string name="media_delete_dialog_title">Xóa %1$s?</string>
+    <string name="media_delete_dialog_message">Mục này sẽ bị xóa khỏi danh mục. Tệp gốc trên bộ nhớ thiết bị sẽ không bị xóa.</string>
+    <string name="media_delete_success">Đã xóa \"%1$s\".</string>
+    <string name="media_delete_error">Không thể xóa mục này.</string>
+    <string name="video_player_playback_error">Không thể phát \"%1$s\".</string>
+</resources>

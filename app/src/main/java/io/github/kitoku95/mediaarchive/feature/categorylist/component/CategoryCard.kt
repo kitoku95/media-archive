@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Public
@@ -12,6 +13,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ import io.github.kitoku95.mediaarchive.domain.model.Category
 fun CategoryCard(
     category: Category,
     onClick: () -> Unit,
+    onDeleteClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val isPrivate = category.accessMode == AccessMode.PRIVATE
@@ -72,22 +75,36 @@ fun CategoryCard(
                 )
             }
 
-            AssistChip(
-                onClick = onClick,
-                label = {
-                    Text(
-                        text = stringResource(
-                            if (isPrivate) R.string.category_mode_private else R.string.category_mode_public
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                AssistChip(
+                    onClick = onClick,
+                    label = {
+                        Text(
+                            text = stringResource(
+                                if (isPrivate) R.string.category_mode_private else R.string.category_mode_public
+                            )
                         )
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (isPrivate) Icons.Outlined.Lock else Icons.Outlined.Public,
-                        contentDescription = null
-                    )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = if (isPrivate) Icons.Outlined.Lock else Icons.Outlined.Public,
+                            contentDescription = null
+                        )
+                    }
+                )
+                if (!category.isDefault && onDeleteClick != null) {
+                    IconButton(onClick = onDeleteClick) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = stringResource(R.string.category_delete_action),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-            )
+            }
         }
     }
 }

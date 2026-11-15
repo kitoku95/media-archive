@@ -26,6 +26,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -118,6 +121,23 @@ fun ImageViewerRoute(
                         snackbarHostState.showSnackbar(message)
                     }
                 }
+                is ImageViewerUiEffect.ShowDeleteSuccess -> {
+                    val message = context.getString(
+                        R.string.media_delete_success,
+                        effect.displayName
+                    )
+                    if (effect.shouldNavigateBack) {
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        onNavigateBack()
+                    } else {
+                        snackbarHostState.showSnackbar(message)
+                    }
+                }
+                ImageViewerUiEffect.ShowDeleteError -> {
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.media_delete_error)
+                    )
+                }
             }
         }
     }
@@ -196,12 +216,40 @@ fun ImageViewerScreen(
                             title = currentItem?.displayName.orEmpty(),
                             currentIndex = pagerState.currentPage + 1,
                             totalCount = uiState.images.size,
-                            onBackClick = { onEvent(ImageViewerUiEvent.OnBackClicked) }
+                            onBackClick = { onEvent(ImageViewerUiEvent.OnBackClicked) },
+                            onDeleteClick = currentItem?.let { item ->
+                                { onEvent(ImageViewerUiEvent.OnDeleteClicked(item)) }
+                            }
                         )
                     }
                 }
             }
         }
+    }
+
+    uiState.deleteConfirmationItem?.let { item ->
+        AlertDialog(
+            onDismissRequest = { onEvent(ImageViewerUiEvent.OnDismissDeleteDialog) },
+            title = {
+                Text(text = stringResource(R.string.media_delete_dialog_title, item.displayName))
+            },
+            text = {
+                Text(text = stringResource(R.string.media_delete_dialog_message))
+            },
+            confirmButton = {
+                TextButton(onClick = { onEvent(ImageViewerUiEvent.OnConfirmDelete) }) {
+                    Text(
+                        text = stringResource(R.string.common_delete),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onEvent(ImageViewerUiEvent.OnDismissDeleteDialog) }) {
+                    Text(text = stringResource(R.string.category_dialog_cancel))
+                }
+            }
+        )
     }
 }
 
@@ -299,7 +347,8 @@ private fun ImageViewerTopBar(
     title: String,
     currentIndex: Int,
     totalCount: Int,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onDeleteClick: (() -> Unit)?
 ) {
     Row(
         modifier = Modifier
@@ -336,8 +385,17 @@ private fun ImageViewerTopBar(
             text = stringResource(R.string.viewer_index_counter, currentIndex, totalCount),
             style = MaterialTheme.typography.labelLarge,
             color = Color.White.copy(alpha = 0.9f),
-            modifier = Modifier.padding(end = 12.dp)
+            modifier = Modifier.padding(end = 4.dp)
         )
+        if (onDeleteClick != null) {
+            IconButton(onClick = onDeleteClick) {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = stringResource(R.string.media_delete_action),
+                    tint = Color.White
+                )
+            }
+        }
     }
 }
 

@@ -5,6 +5,7 @@ import io.github.kitoku95.mediaarchive.domain.model.AccessMode
 import io.github.kitoku95.mediaarchive.domain.model.Category
 import io.github.kitoku95.mediaarchive.domain.repository.CategoryRepository
 import io.github.kitoku95.mediaarchive.domain.usecase.category.CreateCategoryUseCase
+import io.github.kitoku95.mediaarchive.domain.usecase.category.DeleteCategoryUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.category.GetCategoriesUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.category.VerifyCategoryPasswordUseCase
 import kotlinx.coroutines.Dispatchers
@@ -58,7 +59,8 @@ class CategoryListViewModelTest {
         viewModel = CategoryListViewModel(
             getCategoriesUseCase = GetCategoriesUseCase(fakeRepository),
             createCategoryUseCase = CreateCategoryUseCase(fakeRepository),
-            verifyCategoryPasswordUseCase = VerifyCategoryPasswordUseCase(fakeRepository)
+            verifyCategoryPasswordUseCase = VerifyCategoryPasswordUseCase(fakeRepository),
+            deleteCategoryUseCase = DeleteCategoryUseCase(fakeRepository)
         )
     }
 
@@ -159,6 +161,37 @@ class CategoryListViewModelTest {
         }
     }
 
+    @Test
+    fun `deleting custom category opens confirmation and removes category`() = runTest {
+        viewModel.uiState.test {
+            awaitItem() // initial
+            awaitItem() // loaded
+
+            viewModel.onEvent(CategoryListUiEvent.OnDeleteCategoryClicked(privateCategory))
+            val confirming = awaitItem()
+            assertEquals(privateCategory, confirming.deleteConfirmationCategory)
+
+            viewModel.onEvent(CategoryListUiEvent.OnConfirmDeleteCategory)
+            advanceUntilIdle()
+            val afterDelete = expectMostRecentItem()
+            assertNull(afterDelete.deleteConfirmationCategory)
+            assertFalse(afterDelete.categories.any { it.id == privateCategory.id })
+        }
+    }
+
+    @Test
+    fun `clicking delete on default Main category does not open confirmation`() = runTest {
+        viewModel.uiState.test {
+            awaitItem() // initial
+            val loaded = awaitItem()
+            assertNull(loaded.deleteConfirmationCategory)
+
+            viewModel.onEvent(CategoryListUiEvent.OnDeleteCategoryClicked(mainCategory))
+            advanceUntilIdle()
+            expectNoEvents()
+        }
+    }
+
     private class FakeCategoryRepository(
         initialCategories: List<Category>,
         private val passwords: MutableMap<Long, String>
@@ -201,6 +234,14 @@ class CategoryListViewModelTest {
             return passwords[categoryId] == password
         }
 
-        override suspend fun deleteCategory(categoryId: Long): Result<Unit> = Result.success(Unit)
+        override suspend fun deleteCategory(categoryId: Long): Result<Unit> {
+            val target = categoriesFlow.value.firstOrNull { it.id == categoryId }
+                ?: return Result.failure(IllegalArgumentException("Not found"))
+            if (target.isDefault) {
+                return Result.failure(IllegalStateException("Cannot delete Main"))
+            }
+            categoriesFlow.value = categoriesFlow.value.filterNot { it.id == categoryId }
+            return Result.success(Unit)
+        }
     }
 }

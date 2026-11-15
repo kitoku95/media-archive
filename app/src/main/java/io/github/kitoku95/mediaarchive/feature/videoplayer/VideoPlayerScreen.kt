@@ -78,6 +78,11 @@ fun VideoPlayerRoute(
                         snackbarHostState.showSnackbar(message)
                     }
                 }
+                is VideoPlayerUiEffect.ShowPlaybackError -> {
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.video_player_playback_error, effect.displayName)
+                    )
+                }
             }
         }
     }
@@ -280,7 +285,7 @@ fun VideoPlayerScreen(
                         visible = isControlsVisible,
                         title = activeTitle,
                         currentIndex = currentIndex,
-                        totalCount = totalCount.coerceAtLeast(uiState.videos.size),
+                        totalCount = if (totalCount > 0) totalCount else uiState.videos.size,
                         isPlaying = isPlaying,
                         hasPrevious = hasPrevious,
                         hasNext = hasNext,

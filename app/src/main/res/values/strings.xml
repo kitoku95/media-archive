@@ -92,4 +92,17 @@
     <string name="video_player_play">Play</string>
     <string name="video_player_pause">Pause</string>
     <string name="media_file_missing_removed">\"%1$s\" no longer exists and was removed. Please re-select the file.</string>
+
+    <!-- Deletion & Playback Error -->
+    <string name="common_delete">Delete</string>
+    <string name="category_delete_action">Delete category</string>
+    <string name="category_delete_dialog_title">Delete %1$s?</string>
+    <string name="category_delete_dialog_message">This will remove the category and all archived media entries from MediaArchive. Your original files on device storage will not be deleted.</string>
+    <string name="category_delete_error">Could not delete category. Please try again.</string>
+    <string name="media_delete_action">Remove media</string>
+    <string name="media_delete_dialog_title">Remove %1$s?</string>
+    <string name="media_delete_dialog_message">This will remove the item from this category. Your original file on device storage will not be deleted.</string>
+    <string name="media_delete_success">Removed \"%1$s\".</string>
+    <string name="media_delete_error">Could not remove media item.</string>
+    <string name="video_player_playback_error">Unable to play \"%1$s\".</string>
 </resources>

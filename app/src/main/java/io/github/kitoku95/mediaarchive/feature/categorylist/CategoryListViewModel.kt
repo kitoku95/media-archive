@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
 import io.github.kitoku95.mediaarchive.domain.model.Category
 import io.github.kitoku95.mediaarchive.domain.usecase.category.CreateCategoryUseCase
+import io.github.kitoku95.mediaarchive.domain.usecase.category.DeleteCategoryUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.category.GetCategoriesUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.category.VerifyCategoryPasswordUseCase
 import kotlinx.coroutines.channels.Channel
@@ -27,22 +28,26 @@ import javax.inject.Inject
 class CategoryListViewModel @Inject constructor(
     getCategoriesUseCase: GetCategoriesUseCase,
     private val createCategoryUseCase: CreateCategoryUseCase,
-    private val verifyCategoryPasswordUseCase: VerifyCategoryPasswordUseCase
+    private val verifyCategoryPasswordUseCase: VerifyCategoryPasswordUseCase,
+    private val deleteCategoryUseCase: DeleteCategoryUseCase
 ) : ViewModel() {
 
     private val createDialogState = MutableStateFlow<CreateCategoryDialogState?>(null)
     private val passwordPromptState = MutableStateFlow<PasswordPromptState?>(null)
+    private val deleteConfirmationCategory = MutableStateFlow<Category?>(null)
 
     val uiState: StateFlow<CategoryListUiState> = combine(
         getCategoriesUseCase(),
         createDialogState,
-        passwordPromptState
-    ) { categories, createDialog, passwordPrompt ->
+        passwordPromptState,
+        deleteConfirmationCategory
+    ) { categories, createDialog, passwordPrompt, deleteCandidate ->
         CategoryListUiState(
             categories = categories,
             isLoading = false,
             createDialog = createDialog,
-            passwordPrompt = passwordPrompt
+            passwordPrompt = passwordPrompt,
+            deleteConfirmationCategory = deleteCandidate
         )
     }.stateIn(
         scope = viewModelScope,
@@ -92,6 +97,15 @@ class CategoryListViewModel @Inject constructor(
                 )
             }
             CategoryListUiEvent.OnConfirmPasswordPrompt -> submitPasswordPrompt()
+            is CategoryListUiEvent.OnDeleteCategoryClicked -> {
+                if (!event.category.isDefault) {
+                    deleteConfirmationCategory.value = event.category
+                }
+            }
+            CategoryListUiEvent.OnDismissDeleteCategoryDialog -> {
+                deleteConfirmationCategory.value = null
+            }
+            CategoryListUiEvent.OnConfirmDeleteCategory -> submitDeleteCategory()
             CategoryListUiEvent.OnSettingsClicked -> {
                 viewModelScope.launch {
                     _uiEffect.send(CategoryListUiEffect.NavigateToSettings)
@@ -189,6 +203,18 @@ class CategoryListViewModel @Inject constructor(
                     isVerifying = false,
                     isError = true
                 )
+            }
+        }
+    }
+
+    private fun submitDeleteCategory() {
+        val target = deleteConfirmationCategory.value ?: return
+        deleteConfirmationCategory.value = null
+        if (target.isDefault) return
+
+        viewModelScope.launch {
+            deleteCategoryUseCase(target.id).onFailure {
+                _uiEffect.send(CategoryListUiEffect.ShowDeleteCategoryError)
             }
         }
     }

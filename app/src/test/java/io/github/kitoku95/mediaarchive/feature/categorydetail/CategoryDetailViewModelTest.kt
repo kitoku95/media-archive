@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.repository.MediaRepository
+import io.github.kitoku95.mediaarchive.domain.usecase.media.DeleteMediaItemUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.GetMediaByCategoryUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.ImportFolderMediaUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.ImportSelectedMediaUseCase
@@ -74,7 +75,8 @@ class CategoryDetailViewModelTest {
             savedStateHandle = savedStateHandle,
             getMediaByCategoryUseCase = GetMediaByCategoryUseCase(fakeRepository),
             importSelectedMediaUseCase = ImportSelectedMediaUseCase(fakeRepository),
-            importFolderMediaUseCase = ImportFolderMediaUseCase(fakeRepository)
+            importFolderMediaUseCase = ImportFolderMediaUseCase(fakeRepository),
+            deleteMediaItemUseCase = DeleteMediaItemUseCase(fakeRepository)
         )
     }
 
@@ -250,6 +252,37 @@ class CategoryDetailViewModelTest {
             return Result.success(0)
         }
 
-        override suspend fun deleteMediaItem(mediaItemId: Long): Result<Unit> = Result.success(Unit)
+        override suspend fun deleteMediaItem(mediaItemId: Long): Result<Unit> {
+            itemsFlow.value = itemsFlow.value.filterNot { it.id == mediaItemId }
+            return Result.success(Unit)
+        }
+
+        override suspend fun isMediaAccessible(contentUri: String): Boolean = true
+    }
+
+    @Test
+    fun `confirming delete media item removes it from grid and emits success effect`() = runTest {
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.onEvent(CategoryDetailUiEvent.OnDeleteMediaClicked(sampleImage))
+            val confirming = awaitItem()
+            assertEquals(sampleImage, confirming.deleteConfirmationItem)
+
+            viewModel.onEvent(CategoryDetailUiEvent.OnConfirmDeleteMedia)
+            advanceUntilIdle()
+
+            val updated = expectMostRecentItem()
+            assertEquals(null, updated.deleteConfirmationItem)
+            assertEquals(emptyList<MediaItem>(), updated.images)
+        }
+
+        viewModel.uiEffect.test {
+            assertEquals(
+                CategoryDetailUiEffect.ShowDeleteMediaSuccess(sampleImage.displayName),
+                awaitItem()
+            )
+        }
     }
 }

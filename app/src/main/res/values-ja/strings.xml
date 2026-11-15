@@ -92,4 +92,17 @@
     <string name="video_player_play">再生</string>
     <string name="video_player_pause">一時停止</string>
     <string name="media_file_missing_removed">「%1$s」が見つからないため一覧から削除しました。ファイルを再選択してください。</string>
+
+    <!-- Deletion & Playback Error -->
+    <string name="common_delete">削除</string>
+    <string name="category_delete_action">カテゴリーを削除</string>
+    <string name="category_delete_dialog_title">「%1$s」を削除しますか？</string>
+    <string name="category_delete_dialog_message">このカテゴリーとアーカイブされたメディア項目がMediaArchiveから削除されます。端末上の元のファイルは削除されません。</string>
+    <string name="category_delete_error">カテゴリーを削除できませんでした。もう一度お試しください。</string>
+    <string name="media_delete_action">メディアを削除</string>
+    <string name="media_delete_dialog_title">「%1$s」を削除しますか？</string>
+    <string name="media_delete_dialog_message">この項目をカテゴリーから削除します。端末上の元のファイルは削除されません。</string>
+    <string name="media_delete_success">「%1$s」を削除しました。</string>
+    <string name="media_delete_error">メディア項目を削除できませんでした。</string>
+    <string name="video_player_playback_error">「%1$s」を再生できません。</string>
 </resources>

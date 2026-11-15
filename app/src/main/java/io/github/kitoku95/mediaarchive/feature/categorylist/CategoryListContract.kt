@@ -9,7 +9,8 @@ data class CategoryListUiState(
     val categories: List<Category> = emptyList(),
     val isLoading: Boolean = true,
     val createDialog: CreateCategoryDialogState? = null,
-    val passwordPrompt: PasswordPromptState? = null
+    val passwordPrompt: PasswordPromptState? = null,
+    val deleteConfirmationCategory: Category? = null
 )
 
 @Immutable
@@ -47,6 +48,9 @@ sealed interface CategoryListUiEvent {
     data object OnDismissPasswordPrompt : CategoryListUiEvent
     data class OnPasswordPromptChanged(val password: String) : CategoryListUiEvent
     data object OnConfirmPasswordPrompt : CategoryListUiEvent
+    data class OnDeleteCategoryClicked(val category: Category) : CategoryListUiEvent
+    data object OnDismissDeleteCategoryDialog : CategoryListUiEvent
+    data object OnConfirmDeleteCategory : CategoryListUiEvent
     data object OnSettingsClicked : CategoryListUiEvent
     data object OnAboutClicked : CategoryListUiEvent
 }
@@ -55,4 +59,5 @@ sealed interface CategoryListUiEffect {
     data class NavigateToCategoryDetail(val category: Category) : CategoryListUiEffect
     data object NavigateToSettings : CategoryListUiEffect
     data object NavigateToAbout : CategoryListUiEffect
+    data object ShowDeleteCategoryError : CategoryListUiEffect
 }

@@ -11,19 +11,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -42,6 +49,8 @@ fun CategoryListRoute(
     viewModel: CategoryListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(viewModel) {
         viewModel.uiEffect.collect { effect ->
@@ -51,12 +60,18 @@ fun CategoryListRoute(
                 }
                 CategoryListUiEffect.NavigateToSettings -> onNavigateToSettings()
                 CategoryListUiEffect.NavigateToAbout -> onNavigateToAbout()
+                CategoryListUiEffect.ShowDeleteCategoryError -> {
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.category_delete_error)
+                    )
+                }
             }
         }
     }
 
     CategoryListScreen(
         uiState = uiState,
+        snackbarHostState = snackbarHostState,
         onEvent = viewModel::onEvent
     )
 }
@@ -65,11 +80,13 @@ fun CategoryListRoute(
 @Composable
 fun CategoryListScreen(
     uiState: CategoryListUiState,
+    snackbarHostState: SnackbarHostState,
     onEvent: (CategoryListUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -130,7 +147,12 @@ fun CategoryListScreen(
                 ) { category ->
                     CategoryCard(
                         category = category,
-                        onClick = { onEvent(CategoryListUiEvent.OnCategoryClicked(category)) }
+                        onClick = { onEvent(CategoryListUiEvent.OnCategoryClicked(category)) },
+                        onDeleteClick = if (!category.isDefault) {
+                            { onEvent(CategoryListUiEvent.OnDeleteCategoryClicked(category)) }
+                        } else {
+                            null
+                        }
                     )
                 }
             }
@@ -154,6 +176,31 @@ fun CategoryListScreen(
             onPasswordChanged = { onEvent(CategoryListUiEvent.OnPasswordPromptChanged(it)) },
             onConfirm = { onEvent(CategoryListUiEvent.OnConfirmPasswordPrompt) },
             onDismiss = { onEvent(CategoryListUiEvent.OnDismissPasswordPrompt) }
+        )
+    }
+
+    uiState.deleteConfirmationCategory?.let { category ->
+        AlertDialog(
+            onDismissRequest = { onEvent(CategoryListUiEvent.OnDismissDeleteCategoryDialog) },
+            title = {
+                Text(text = stringResource(R.string.category_delete_dialog_title, category.name))
+            },
+            text = {
+                Text(text = stringResource(R.string.category_delete_dialog_message))
+            },
+            confirmButton = {
+                TextButton(onClick = { onEvent(CategoryListUiEvent.OnConfirmDeleteCategory) }) {
+                    Text(
+                        text = stringResource(R.string.common_delete),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onEvent(CategoryListUiEvent.OnDismissDeleteCategoryDialog) }) {
+                    Text(text = stringResource(R.string.category_dialog_cancel))
+                }
+            }
         )
     }
 }

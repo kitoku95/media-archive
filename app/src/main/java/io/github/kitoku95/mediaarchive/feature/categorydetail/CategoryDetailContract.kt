@@ -17,7 +17,8 @@ data class CategoryDetailUiState(
     val videos: List<MediaItem> = emptyList(),
     val isLoading: Boolean = true,
     val isImporting: Boolean = false,
-    val isBrowseSheetVisible: Boolean = false
+    val isBrowseSheetVisible: Boolean = false,
+    val deleteConfirmationItem: MediaItem? = null
 )
 
 /**
@@ -34,6 +35,9 @@ sealed interface CategoryDetailUiEvent {
     data class OnFolderSelected(val treeUri: String) : CategoryDetailUiEvent
     data class OnImageClicked(val mediaId: Long, val index: Int) : CategoryDetailUiEvent
     data class OnVideoClicked(val mediaId: Long, val index: Int) : CategoryDetailUiEvent
+    data class OnDeleteMediaClicked(val mediaItem: MediaItem) : CategoryDetailUiEvent
+    data object OnDismissDeleteMediaDialog : CategoryDetailUiEvent
+    data object OnConfirmDeleteMedia : CategoryDetailUiEvent
 }
 
 /**
@@ -48,4 +52,6 @@ sealed interface CategoryDetailUiEffect {
     data class ShowImportSuccess(val importedCount: Int) : CategoryDetailUiEffect
     data object ShowImportEmpty : CategoryDetailUiEffect
     data object ShowImportError : CategoryDetailUiEffect
+    data class ShowDeleteMediaSuccess(val displayName: String) : CategoryDetailUiEffect
+    data object ShowDeleteMediaError : CategoryDetailUiEffect
 }

@@ -41,6 +41,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -118,13 +120,19 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
-                AppThemePalette.entries.forEach { palette ->
-                    ThemePaletteOptionCard(
-                        palette = palette,
-                        isSelected = uiState.selectedPalette == palette,
-                        isDarkPreview = isDarkPreview,
-                        onClick = { onEvent(SettingsUiEvent.OnPaletteSelected(palette)) }
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    AppThemePalette.entries.forEach { palette ->
+                        ThemePaletteOptionCard(
+                            palette = palette,
+                            isSelected = uiState.selectedPalette == palette,
+                            isDarkPreview = isDarkPreview,
+                            onClick = { onEvent(SettingsUiEvent.OnPaletteSelected(palette)) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
 
@@ -244,7 +252,8 @@ private fun ThemePaletteOptionCard(
     palette: AppThemePalette,
     isSelected: Boolean,
     isDarkPreview: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val borderColor = if (isSelected) {
         MaterialTheme.colorScheme.primary
@@ -253,8 +262,7 @@ private fun ThemePaletteOptionCard(
     }
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .border(
                 width = if (isSelected) 2.dp else 1.dp,
                 color = borderColor,
@@ -265,16 +273,16 @@ private fun ThemePaletteOptionCard(
             containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+                .padding(horizontal = 6.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(34.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
                     .background(palette.swatchColor(isDark = isDarkPreview)),
                 contentAlignment = Alignment.Center
@@ -289,17 +297,14 @@ private fun ThemePaletteOptionCard(
                 }
             }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = paletteTitle(palette),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = paletteDescription(palette),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Text(
+                text = paletteTitle(palette),
+                style = MaterialTheme.typography.labelMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                minLines = 2
+            )
         }
     }
 }
@@ -310,14 +315,6 @@ private fun paletteTitle(palette: AppThemePalette): String = when (palette) {
     AppThemePalette.DEEP_CRIMSON -> stringResource(R.string.settings_theme_deep_crimson)
     AppThemePalette.DEEP_FOREST -> stringResource(R.string.settings_theme_deep_forest)
     AppThemePalette.DEEP_SAPPHIRE -> stringResource(R.string.settings_theme_deep_sapphire)
-}
-
-@Composable
-private fun paletteDescription(palette: AppThemePalette): String = when (palette) {
-    AppThemePalette.NEUTRAL_TAUPE -> stringResource(R.string.settings_theme_neutral_taupe_desc)
-    AppThemePalette.DEEP_CRIMSON -> stringResource(R.string.settings_theme_deep_crimson_desc)
-    AppThemePalette.DEEP_FOREST -> stringResource(R.string.settings_theme_deep_forest_desc)
-    AppThemePalette.DEEP_SAPPHIRE -> stringResource(R.string.settings_theme_deep_sapphire_desc)
 }
 
 @Composable

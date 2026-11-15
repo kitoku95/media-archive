@@ -4,18 +4,21 @@ This document defines the branching strategy, commit message conventions, and Pu
 
 ---
 
-## 1. Branching Strategy (GitHub Flow)
+## 1. Branching Strategy (Two-Branch Flow: `main` + `dev`)
 
-The repository uses a clean **GitHub Flow** model where `main` is always buildable and stable:
+The repository uses a clean **Two-Branch Flow** model:
+- **`main`**: Production/release branch, always stable and buildable.
+- **`dev`**: Active integration branch. **All new features, phases, bug fixes, documentation updates, and security hardening branches MUST be cut from `dev`** and merged back into `dev` via Pull Request. When a milestone is ready for release, `dev` is merged into `main`.
 
 ```mermaid
 flowchart LR
-    M0((main)) --> B0["docs/phase-0-architecture-and-roadmap"]
-    B0 -->|PR + Merge| M1((main))
-    M1 --> B1["feat/phase-1-project-setup"]
-    B1 -->|PR + Merge| M2((main))
-    M2 --> B2["feat/phase-2-database-and-thumbnail"]
-    B2 -->|PR + Merge| M3((main))
+    D0((dev)) --> B0["docs/phase-0-architecture-and-roadmap"]
+    B0 -->|PR + Merge| D1((dev))
+    D1 --> B1["feat/phase-1-project-setup"]
+    B1 -->|PR + Merge| D2((dev))
+    D2 --> B2["feat/phase-2-database-and-thumbnail"]
+    B2 -->|PR + Merge| D3((dev))
+    D3 -->|Release PR| M1((main))
 ```
 
 ### Official Branch Names by Phase
@@ -76,18 +79,18 @@ All commit messages must be written in **English** using the **Conventional Comm
 
 For every implementation session:
 
-1. **Sync `main` and checkout the Phase branch**:
+1. **Sync `dev` and checkout the new branch from `dev`**:
    ```powershell
-   git checkout main
-   git pull origin main
-   git checkout -b <phase-branch-name>
+   git checkout dev
+   git pull origin dev
+   git checkout -b <phase-branch-name> dev
    ```
 2. **Read `AGENTS.md` and the Phase specification** in `docs/roadmap/implementation-phases.md`.
 3. **Implement and verify locally**:
    - Run `./gradlew assembleDebug` and `./gradlew testDebugUnitTest`.
-4. **Commit and open a Pull Request**:
+4. **Commit and open a Pull Request targeting `dev`**:
    ```powershell
    git push -u origin <phase-branch-name>
-   gh pr create --base main --head <phase-branch-name>
+   gh pr create --base dev --head <phase-branch-name>
    ```
-5. **Merge PR and tag release milestone** (`v0.1.0-phase1` ... `v1.0.0`).
+5. **Merge PR into `dev`**, and merge `dev` into `main` with a release tag (`v0.1.0-phase1` ... `v1.0.0`) when releasing a milestone.

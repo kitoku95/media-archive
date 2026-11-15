@@ -38,7 +38,7 @@ flowchart TD
 ## Phase 1: Project Initialization, Multi-Theme System, Localization (`en`/`vi`/`ja`), `Settings` & `About` Screen
 
 - **Git Branch**: `feat/phase-1-project-setup`
-- **Branch Command**: `git checkout -b feat/phase-1-project-setup`
+- **Branch Command**: `git checkout -b feat/phase-1-project-setup dev`
 - **Suggested Commit**: `feat(core): initialize android project with multi-theme palettes, EN/VI/JA localization, settings and about screen`
 
 ### Goal:
@@ -68,7 +68,7 @@ Bootstrap the Android Kotlin 2.x + Jetpack Compose (Material 3) project, configu
 ## Phase 2: SQLite Database (Room), Default `Main` Category Seed & Thumbnail Engine
 
 - **Git Branch**: `feat/phase-2-database-and-thumbnail`
-- **Branch Command**: `git checkout -b feat/phase-2-database-and-thumbnail`
+- **Branch Command**: `git checkout -b feat/phase-2-database-and-thumbnail dev`
 - **Suggested Commit**: `feat(db): implement room schema, default Main category seed and thumbnail storage engine`
 
 ### Goal:
@@ -96,7 +96,7 @@ Implement the SQLite database layer using Room, automatically seed the default `
 ## Phase 3: Category Management (`public` / `private`) & Password Gate
 
 - **Git Branch**: `feat/phase-3-category-and-auth`
-- **Branch Command**: `git checkout -b feat/phase-3-category-and-auth`
+- **Branch Command**: `git checkout -b feat/phase-3-category-and-auth dev`
 - **Suggested Commit**: `feat(category): implement public and private category management with unrestricted password gate`
 
 ### Goal:
@@ -123,7 +123,7 @@ Build the main Category list screen requiring users to select a Category before 
 ## Phase 4: Category Detail (2 Separate Square Grid Tabs) & Manual Storage Browser (SAF)
 
 - **Git Branch**: `feat/phase-4-media-grid-and-saf-browser`
-- **Branch Command**: `git checkout -b feat/phase-4-media-grid-and-saf-browser`
+- **Branch Command**: `git checkout -b feat/phase-4-media-grid-and-saf-browser dev`
 - **Suggested Commit**: `feat(grid): implement dual image/video square grid tabs and manual SAF file and folder ingestion`
 
 ### Goal:
@@ -151,7 +151,7 @@ Build `CategoryDetailScreen` featuring 2 separate tabs (**Images** and **Videos*
 ## Phase 5: Full-Screen Swipe Image Viewer & Media3 Video Player
 
 - **Git Branch**: `feat/phase-5-image-pager-and-video-player`
-- **Branch Command**: `git checkout -b feat/phase-5-image-pager-and-video-player`
+- **Branch Command**: `git checkout -b feat/phase-5-image-pager-and-video-player dev`
 - **Suggested Commit**: `feat(viewer): implement full-screen swipe image pager and media3 video player with prev/next buttons`
 
 ### Goal:
@@ -175,7 +175,7 @@ Deliver the full-screen Image Viewer (swipe left/right to navigate) and the Vide
 ## Phase 6: Edge Cases, Cleanup & Automated Testing
 
 - **Git Branch**: `feat/phase-6-polish-and-testing`
-- **Branch Command**: `git checkout -b feat/phase-6-polish-and-testing`
+- **Branch Command**: `git checkout -b feat/phase-6-polish-and-testing dev`
 - **Suggested Commit**: `feat(polish): handle missing external files, thumbnail cleanup and add unit test suite`
 
 ### Goal:
@@ -195,7 +195,7 @@ Handle external file deletions gracefully, allow removing media items or custom 
 ## Phase 7: Source Code Security Audit & Local Storage Hardening
 
 - **Git Branch**: `sec/phase-7-source-security-hardening`
-- **Branch Command**: `git checkout -b sec/phase-7-source-security-hardening`
+- **Branch Command**: `git checkout -b sec/phase-7-source-security-hardening dev`
 - **Suggested Commit**: `sec(security): enforce FLAG_SECURE on private categories, disable backup and complete security audit`
 
 ### Goal:

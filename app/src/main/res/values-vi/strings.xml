@@ -82,4 +82,14 @@
     <string name="about_feature_organize">Phân loại ảnh và video theo từng danh mục rõ ràng</string>
     <string name="about_feature_manual">Chủ động chọn lọc từng tệp hoặc thư mục muốn thêm</string>
     <string name="about_feature_privacy">Khóa các danh mục riêng tư bằng mật khẩu cá nhân</string>
+
+    <!-- Image Viewer & Video Player -->
+    <string name="viewer_index_counter">%1$d / %2$d</string>
+    <string name="image_viewer_empty">Chưa có ảnh nào trong danh mục này</string>
+    <string name="video_player_empty">Chưa có video nào trong danh mục này</string>
+    <string name="video_player_previous">Video trước</string>
+    <string name="video_player_next">Video tiếp theo</string>
+    <string name="video_player_play">Phát</string>
+    <string name="video_player_pause">Tạm dừng</string>
+    <string name="media_file_missing_removed">Tệp \"%1$s\" không còn tồn tại và đã được xóa khỏi danh mục. Vui lòng chọn lại tệp.</string>
 </resources>

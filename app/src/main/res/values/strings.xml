@@ -82,4 +82,14 @@
     <string name="about_feature_organize">Organize photos and videos into dedicated categories</string>
     <string name="about_feature_manual">Browse and add only the files or folders you select</string>
     <string name="about_feature_privacy">Lock private categories with a personal password</string>
+
+    <!-- Image Viewer & Video Player -->
+    <string name="viewer_index_counter">%1$d / %2$d</string>
+    <string name="image_viewer_empty">No images in this category</string>
+    <string name="video_player_empty">No videos in this category</string>
+    <string name="video_player_previous">Previous video</string>
+    <string name="video_player_next">Next video</string>
+    <string name="video_player_play">Play</string>
+    <string name="video_player_pause">Pause</string>
+    <string name="media_file_missing_removed">\"%1$s\" no longer exists and was removed. Please re-select the file.</string>
 </resources>

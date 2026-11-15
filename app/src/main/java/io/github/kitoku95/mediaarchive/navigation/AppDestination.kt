@@ -17,6 +17,18 @@ sealed interface AppDestination {
     ) : AppDestination
 
     @Serializable
+    data class ImageViewer(
+        val categoryId: Long,
+        val initialIndex: Int
+    ) : AppDestination
+
+    @Serializable
+    data class VideoPlayer(
+        val categoryId: Long,
+        val initialIndex: Int
+    ) : AppDestination
+
+    @Serializable
     data object Settings : AppDestination
 
     @Serializable

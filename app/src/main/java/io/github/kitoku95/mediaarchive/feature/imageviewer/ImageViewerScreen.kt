@@ -1,8 +1,5 @@
 package io.github.kitoku95.mediaarchive.feature.imageviewer
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -69,6 +66,8 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import io.github.kitoku95.mediaarchive.R
+import io.github.kitoku95.mediaarchive.core.security.PrivateScreenProtectionEffect
+import io.github.kitoku95.mediaarchive.core.security.findActivity
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 
 /**
@@ -83,6 +82,8 @@ fun ImageViewerRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val view = LocalView.current
+
+    PrivateScreenProtectionEffect(isPrivate = uiState.isPrivate)
 
     DisposableEffect(view, uiState.isOverlayVisible) {
         val window = context.findActivity()?.window
@@ -397,10 +398,4 @@ private fun ImageViewerTopBar(
             }
         }
     }
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }

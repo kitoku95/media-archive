@@ -34,7 +34,8 @@ class ImageViewerViewModel @Inject constructor(
     private val route: AppDestination.ImageViewer = if (savedStateHandle.contains("categoryId")) {
         AppDestination.ImageViewer(
             categoryId = savedStateHandle.get<Number>("categoryId")?.toLong() ?: 0L,
-            initialIndex = savedStateHandle.get<Number>("initialIndex")?.toInt() ?: 0
+            initialIndex = savedStateHandle.get<Number>("initialIndex")?.toInt() ?: 0,
+            isPrivate = savedStateHandle.get<Boolean>("isPrivate") ?: false
         )
     } else {
         savedStateHandle.toRoute<AppDestination.ImageViewer>()
@@ -56,6 +57,7 @@ class ImageViewerViewModel @Inject constructor(
             categoryId = route.categoryId,
             images = images,
             initialIndex = route.initialIndex,
+            isPrivate = route.isPrivate,
             isOverlayVisible = overlayVisible,
             isLoading = false,
             deleteConfirmationItem = deleteCandidate
@@ -66,6 +68,7 @@ class ImageViewerViewModel @Inject constructor(
         initialValue = ImageViewerUiState(
             categoryId = route.categoryId,
             initialIndex = route.initialIndex,
+            isPrivate = route.isPrivate,
             isLoading = true
         )
     )

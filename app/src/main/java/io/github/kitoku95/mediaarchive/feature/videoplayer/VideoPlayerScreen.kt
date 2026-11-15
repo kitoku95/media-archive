@@ -1,8 +1,5 @@
 package io.github.kitoku95.mediaarchive.feature.videoplayer
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -47,6 +44,8 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import io.github.kitoku95.mediaarchive.R
+import io.github.kitoku95.mediaarchive.core.security.PrivateScreenProtectionEffect
+import io.github.kitoku95.mediaarchive.core.security.findActivity
 import io.github.kitoku95.mediaarchive.feature.videoplayer.component.VideoPlayerControlsOverlay
 import kotlinx.coroutines.delay
 
@@ -61,6 +60,8 @@ fun VideoPlayerRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    PrivateScreenProtectionEffect(isPrivate = uiState.isPrivate)
 
     LaunchedEffect(viewModel) {
         viewModel.uiEffect.collect { effect ->
@@ -322,10 +323,4 @@ fun VideoPlayerScreen(
             }
         }
     }
-}
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
 }

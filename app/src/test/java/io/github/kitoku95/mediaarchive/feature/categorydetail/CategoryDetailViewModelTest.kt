@@ -182,13 +182,21 @@ class CategoryDetailViewModelTest {
         viewModel.uiEffect.test {
             viewModel.onEvent(CategoryDetailUiEvent.OnImageClicked(mediaId = 1L, index = 0))
             assertEquals(
-                CategoryDetailUiEffect.NavigateToImageViewer(categoryId = 10L, initialIndex = 0),
+                CategoryDetailUiEffect.NavigateToImageViewer(
+                    categoryId = 10L,
+                    initialIndex = 0,
+                    isPrivate = true
+                ),
                 awaitItem()
             )
 
             viewModel.onEvent(CategoryDetailUiEvent.OnVideoClicked(mediaId = 2L, index = 0))
             assertEquals(
-                CategoryDetailUiEffect.NavigateToVideoPlayer(categoryId = 10L, initialIndex = 0),
+                CategoryDetailUiEffect.NavigateToVideoPlayer(
+                    categoryId = 10L,
+                    initialIndex = 0,
+                    isPrivate = true
+                ),
                 awaitItem()
             )
         }

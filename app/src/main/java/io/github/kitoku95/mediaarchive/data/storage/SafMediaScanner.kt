@@ -46,7 +46,8 @@ class SafMediaScanner @Inject constructor(
 
     suspend fun inspectSingleFile(uri: Uri): ScannedMediaFile? = withContext(Dispatchers.IO) {
         takePersistableReadPermission(uri)
-        val mimeType = context.contentResolver.getType(uri) ?: return@withContext null
+        val mimeType = runCatching { context.contentResolver.getType(uri) }.getOrNull()
+            ?: return@withContext null
         val mediaType = resolveMediaType(mimeType) ?: return@withContext null
 
         val (displayName, sizeBytes) = queryDisplayNameAndSize(uri)
@@ -84,7 +85,9 @@ class SafMediaScanner @Inject constructor(
                 if (child.isDirectory) {
                     stack.addLast(child)
                 } else if (child.isFile) {
-                    val mimeType = child.type ?: context.contentResolver.getType(child.uri) ?: continue
+                    val mimeType = runCatching {
+                        child.type ?: context.contentResolver.getType(child.uri)
+                    }.getOrNull() ?: continue
                     val mediaType = resolveMediaType(mimeType) ?: continue
                     val displayName = child.name?.takeIf { it.isNotBlank() }
                         ?: queryDisplayNameAndSize(child.uri).first

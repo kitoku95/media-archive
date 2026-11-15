@@ -65,7 +65,8 @@ class ImageViewerViewModelTest {
             savedStateHandle = SavedStateHandle(
                 mapOf(
                     "categoryId" to 10L,
-                    "initialIndex" to 1
+                    "initialIndex" to 1,
+                    "isPrivate" to true
                 )
             ),
             getMediaByCategoryUseCase = GetMediaByCategoryUseCase(fakeRepository),
@@ -88,6 +89,7 @@ class ImageViewerViewModelTest {
             assertFalse(loaded.isLoading)
             assertEquals(10L, loaded.categoryId)
             assertEquals(1, loaded.initialIndex)
+            assertTrue(loaded.isPrivate)
             assertEquals(listOf(imageOne, imageTwo), loaded.images)
             assertTrue(loaded.isOverlayVisible)
         }

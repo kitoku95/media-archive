@@ -19,13 +19,15 @@ sealed interface AppDestination {
     @Serializable
     data class ImageViewer(
         val categoryId: Long,
-        val initialIndex: Int
+        val initialIndex: Int,
+        val isPrivate: Boolean = false
     ) : AppDestination
 
     @Serializable
     data class VideoPlayer(
         val categoryId: Long,
-        val initialIndex: Int
+        val initialIndex: Int,
+        val isPrivate: Boolean = false
     ) : AppDestination
 
     @Serializable

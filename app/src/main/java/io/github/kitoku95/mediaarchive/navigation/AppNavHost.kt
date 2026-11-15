@@ -46,19 +46,21 @@ fun AppNavHost(
         composable<AppDestination.CategoryDetail> {
             CategoryDetailRoute(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToImageViewer = { categoryId, initialIndex ->
+                onNavigateToImageViewer = { categoryId, initialIndex, isPrivate ->
                     navController.navigate(
                         AppDestination.ImageViewer(
                             categoryId = categoryId,
-                            initialIndex = initialIndex
+                            initialIndex = initialIndex,
+                            isPrivate = isPrivate
                         )
                     )
                 },
-                onNavigateToVideoPlayer = { categoryId, initialIndex ->
+                onNavigateToVideoPlayer = { categoryId, initialIndex, isPrivate ->
                     navController.navigate(
                         AppDestination.VideoPlayer(
                             categoryId = categoryId,
-                            initialIndex = initialIndex
+                            initialIndex = initialIndex,
+                            isPrivate = isPrivate
                         )
                     )
                 }

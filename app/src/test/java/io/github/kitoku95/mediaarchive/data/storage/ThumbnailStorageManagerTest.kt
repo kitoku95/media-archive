@@ -17,12 +17,13 @@ class ThumbnailStorageManagerTest {
     val tempFolder = TemporaryFolder()
 
     @Test
-    fun `deleteThumbnail removes existing webp file and ignores blank or missing paths`() = runTest {
+    fun `deleteThumbnail removes existing webp file inside thumbnails dir and ignores blank or missing paths`() = runTest {
         val context = mockk<Context> {
             every { filesDir } returns tempFolder.root
         }
         val manager = ThumbnailStorageManager(context)
-        val thumbFile = File(tempFolder.root, "sample.webp").apply { writeText("webp") }
+        val thumbsDir = File(tempFolder.root, "thumbnails").apply { mkdirs() }
+        val thumbFile = File(thumbsDir, "sample.webp").apply { writeText("webp") }
         assertTrue(thumbFile.exists())
 
         manager.deleteThumbnail(thumbFile.absolutePath)
@@ -30,17 +31,31 @@ class ThumbnailStorageManagerTest {
 
         // Should not throw on blank or non-existent path
         manager.deleteThumbnail("")
-        manager.deleteThumbnail(File(tempFolder.root, "missing.webp").absolutePath)
+        manager.deleteThumbnail(File(thumbsDir, "missing.webp").absolutePath)
     }
 
     @Test
-    fun `deleteThumbnails removes all listed files`() = runTest {
+    fun `deleteThumbnail refuses to delete files outside thumbnails directory`() = runTest {
         val context = mockk<Context> {
             every { filesDir } returns tempFolder.root
         }
         val manager = ThumbnailStorageManager(context)
-        val file1 = File(tempFolder.root, "1.webp").apply { writeText("1") }
-        val file2 = File(tempFolder.root, "2.webp").apply { writeText("2") }
+        val outsideFile = File(tempFolder.root, "outside.webp").apply { writeText("keep") }
+        assertTrue(outsideFile.exists())
+
+        manager.deleteThumbnail(outsideFile.absolutePath)
+        assertTrue(outsideFile.exists())
+    }
+
+    @Test
+    fun `deleteThumbnails removes all listed files inside thumbnails dir`() = runTest {
+        val context = mockk<Context> {
+            every { filesDir } returns tempFolder.root
+        }
+        val manager = ThumbnailStorageManager(context)
+        val thumbsDir = File(tempFolder.root, "thumbnails").apply { mkdirs() }
+        val file1 = File(thumbsDir, "1.webp").apply { writeText("1") }
+        val file2 = File(thumbsDir, "2.webp").apply { writeText("2") }
 
         manager.deleteThumbnails(listOf(file1.absolutePath, file2.absolutePath, ""))
 

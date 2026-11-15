@@ -6,12 +6,33 @@
     <string name="common_back">Quay lại</string>
     <string name="common_version_format">Phiên bản %1$s</string>
 
-    <!-- Home / Category List Placeholder (Phase 1) -->
+    <!-- Home / Category List & Dialogs -->
     <string name="category_list_title">Danh mục</string>
     <string name="category_default_name">Main</string>
-    <string name="category_mode_public">Công khai (Public)</string>
-    <string name="category_mode_private">Riêng tư (Private)</string>
-    <string name="category_list_phase_hint">Chọn một danh mục để sắp xếp ảnh và video của bạn. Tính năng quản lý danh mục và duyệt bộ nhớ đầy đủ sẽ được cập nhật tại đây.</string>
+    <string name="category_mode_public">Công khai</string>
+    <string name="category_mode_private">Riêng tư</string>
+    <string name="category_add_button">Tạo danh mục</string>
+    <string name="category_create_dialog_title">Tạo danh mục mới</string>
+    <string name="category_name_label">Tên danh mục</string>
+    <string name="category_name_placeholder">VD: Du lịch, Gia đình</string>
+    <string name="category_access_mode_label">Chế độ truy cập</string>
+    <string name="category_password_label">Mật khẩu</string>
+    <string name="category_password_placeholder">Nhập mật khẩu bất kỳ (không giới hạn độ dài)</string>
+    <string name="category_password_show">Hiện mật khẩu</string>
+    <string name="category_password_hide">Ẩn mật khẩu</string>
+    <string name="category_create_confirm">Tạo</string>
+    <string name="category_dialog_cancel">Hủy</string>
+    <string name="category_error_blank_name">Tên danh mục không được để trống.</string>
+    <string name="category_error_duplicate_name">Danh mục với tên này đã tồn tại.</string>
+    <string name="category_error_empty_password">Vui lòng nhập mật khẩu cho danh mục riêng tư.</string>
+    <string name="category_error_generic">Không thể tạo danh mục. Vui lòng thử lại.</string>
+
+    <string name="category_unlock_dialog_title">Mở khóa %1$s</string>
+    <string name="category_unlock_dialog_subtitle">Nhập mật khẩu để mở danh mục riêng tư này.</string>
+    <string name="category_unlock_confirm">Mở khóa</string>
+    <string name="category_unlock_error_incorrect">Mật khẩu không đúng. Vui lòng thử lại.</string>
+
+    <string name="category_detail_placeholder_hint">Đã mở danh mục. Lưới Ảnh &amp; Video và nút Duyệt bộ nhớ sẽ hiển thị tại đây.</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Cài đặt</string>

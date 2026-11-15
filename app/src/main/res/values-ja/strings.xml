@@ -6,12 +6,33 @@
     <string name="common_back">戻る</string>
     <string name="common_version_format">バージョン %1$s</string>
 
-    <!-- Home / Category List Placeholder (Phase 1) -->
+    <!-- Home / Category List & Dialogs -->
     <string name="category_list_title">カテゴリー</string>
     <string name="category_default_name">Main</string>
-    <string name="category_mode_public">公開 (Public)</string>
-    <string name="category_mode_private">非公開 (Private)</string>
-    <string name="category_list_phase_hint">写真や動画を整理するカテゴリーを選択してください。カテゴリー管理とストレージ参照機能はここに追加されます。</string>
+    <string name="category_mode_public">公開</string>
+    <string name="category_mode_private">非公開</string>
+    <string name="category_add_button">新規カテゴリー</string>
+    <string name="category_create_dialog_title">カテゴリーを作成</string>
+    <string name="category_name_label">カテゴリー名</string>
+    <string name="category_name_placeholder">例: 旅行、家族</string>
+    <string name="category_access_mode_label">公開設定</string>
+    <string name="category_password_label">パスワード</string>
+    <string name="category_password_placeholder">任意のパスワードを入力</string>
+    <string name="category_password_show">パスワードを表示</string>
+    <string name="category_password_hide">パスワードを隠す</string>
+    <string name="category_create_confirm">作成</string>
+    <string name="category_dialog_cancel">キャンセル</string>
+    <string name="category_error_blank_name">カテゴリー名を入力してください。</string>
+    <string name="category_error_duplicate_name">同じ名前のカテゴリーがすでに存在します。</string>
+    <string name="category_error_empty_password">非公開カテゴリーのパスワードを入力してください。</string>
+    <string name="category_error_generic">カテゴリーを作成できませんでした。もう一度お試しください。</string>
+
+    <string name="category_unlock_dialog_title">%1$s のロック解除</string>
+    <string name="category_unlock_dialog_subtitle">この非公開カテゴリーを開くにはパスワードを入力してください。</string>
+    <string name="category_unlock_confirm">ロック解除</string>
+    <string name="category_unlock_error_incorrect">パスワードが正しくありません。もう一度お試しください。</string>
+
+    <string name="category_detail_placeholder_hint">カテゴリーを開きました。画像・動画グリッドとストレージ参照機能はここに表示されます。</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">設定</string>

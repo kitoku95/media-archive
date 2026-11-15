@@ -10,6 +10,13 @@ sealed interface AppDestination {
     data object CategoryList : AppDestination
 
     @Serializable
+    data class CategoryDetail(
+        val categoryId: Long,
+        val categoryName: String,
+        val isPrivate: Boolean
+    ) : AppDestination
+
+    @Serializable
     data object Settings : AppDestination
 
     @Serializable

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MediaArchive</string>
+
+    <!-- Navigation & Common -->
+    <string name="common_back">Back</string>
+    <string name="common_version_format">Version %1$s</string>
+
+    <!-- Home / Category List Placeholder (Phase 1) -->
+    <string name="category_list_title">Categories</string>
+    <string name="category_default_name">Main</string>
+    <string name="category_mode_public">Public</string>
+    <string name="category_mode_private">Private</string>
+    <string name="category_list_phase_hint">Select a category to organize your photos and videos. Full category management and media browsing will be available here.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme_label">Color Theme</string>
+    <string name="settings_theme_neutral_taupe">Neutral Taupe</string>
+    <string name="settings_theme_neutral_taupe_desc">White, black, and warm brownish gray</string>
+    <string name="settings_theme_deep_crimson">Deep Crimson</string>
+    <string name="settings_theme_deep_crimson_desc">Rich dark crimson and burgundy tones</string>
+    <string name="settings_theme_deep_forest">Deep Forest Green</string>
+    <string name="settings_theme_deep_forest_desc">Deep emerald and pine green tones</string>
+    <string name="settings_theme_deep_sapphire">Deep Sapphire Blue</string>
+    <string name="settings_theme_deep_sapphire_desc">Deep navy and midnight blue tones</string>
+
+    <string name="settings_appearance_label">Appearance</string>
+    <string name="settings_appearance_system">System Default</string>
+    <string name="settings_appearance_light">Light</string>
+    <string name="settings_appearance_dark">Dark</string>
+
+    <string name="settings_language_label">Language</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_language_japanese">日本語</string>
+
+    <string name="settings_about_section_label">Information</string>
+    <string name="settings_about_item">About MediaArchive</string>
+    <string name="settings_about_item_subtitle">Learn what MediaArchive can do</string>
+
+    <!-- About Screen (Strict HR-07: User-facing features only, no tech jargon) -->
+    <string name="about_title">About</string>
+    <string name="about_tagline">Your personal, distraction-free media organizer</string>
+    <string name="about_description">Organize and enjoy your personal photos and videos in custom categories tailored to your needs. Add only the specific files or folders you choose without automatic background scanning. Keep sensitive collections protected in private categories with your own password.</string>
+    <string name="about_feature_organize">Organize photos and videos into dedicated categories</string>
+    <string name="about_feature_manual">Browse and add only the files or folders you select</string>
+    <string name="about_feature_privacy">Lock private categories with a personal password</string>
+</resources>

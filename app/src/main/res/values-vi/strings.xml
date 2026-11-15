@@ -92,4 +92,17 @@
     <string name="video_player_play">Phát</string>
     <string name="video_player_pause">Tạm dừng</string>
     <string name="media_file_missing_removed">Tệp \"%1$s\" không còn tồn tại và đã được xóa khỏi danh mục. Vui lòng chọn lại tệp.</string>
+
+    <!-- Deletion & Playback Error -->
+    <string name="common_delete">Xóa</string>
+    <string name="category_delete_action">Xóa danh mục</string>
+    <string name="category_delete_dialog_title">Xóa danh mục %1$s?</string>
+    <string name="category_delete_dialog_message">Thao tác này sẽ xóa danh mục và toàn bộ mục đã lưu trong MediaArchive. Tệp gốc trên bộ nhớ thiết bị sẽ không bị xóa.</string>
+    <string name="category_delete_error">Không thể xóa danh mục. Vui lòng thử lại.</string>
+    <string name="media_delete_action">Xóa khỏi danh mục</string>
+    <string name="media_delete_dialog_title">Xóa %1$s?</string>
+    <string name="media_delete_dialog_message">Mục này sẽ bị xóa khỏi danh mục. Tệp gốc trên bộ nhớ thiết bị sẽ không bị xóa.</string>
+    <string name="media_delete_success">Đã xóa \"%1$s\".</string>
+    <string name="media_delete_error">Không thể xóa mục này.</string>
+    <string name="video_player_playback_error">Không thể phát \"%1$s\".</string>
 </resources>

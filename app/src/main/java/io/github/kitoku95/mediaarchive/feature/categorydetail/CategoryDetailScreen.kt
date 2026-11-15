@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -36,6 +37,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -117,6 +119,16 @@ fun CategoryDetailRoute(
                 CategoryDetailUiEffect.ShowImportError -> {
                     snackbarHostState.showSnackbar(
                         context.getString(R.string.category_detail_import_error)
+                    )
+                }
+                is CategoryDetailUiEffect.ShowDeleteMediaSuccess -> {
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.media_delete_success, effect.displayName)
+                    )
+                }
+                CategoryDetailUiEffect.ShowDeleteMediaError -> {
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.media_delete_error)
                     )
                 }
             }
@@ -262,6 +274,9 @@ fun CategoryDetailScreen(
                                     CategoryDetailUiEvent.OnVideoClicked(item.id, index)
                                 )
                             }
+                        },
+                        onItemLongClick = { item ->
+                            onEvent(CategoryDetailUiEvent.OnDeleteMediaClicked(item))
                         }
                     )
                 }
@@ -276,13 +291,39 @@ fun CategoryDetailScreen(
             onDismiss = { onEvent(CategoryDetailUiEvent.OnDismissBrowseSheet) }
         )
     }
+
+    uiState.deleteConfirmationItem?.let { item ->
+        AlertDialog(
+            onDismissRequest = { onEvent(CategoryDetailUiEvent.OnDismissDeleteMediaDialog) },
+            title = {
+                Text(text = stringResource(R.string.media_delete_dialog_title, item.displayName))
+            },
+            text = {
+                Text(text = stringResource(R.string.media_delete_dialog_message))
+            },
+            confirmButton = {
+                TextButton(onClick = { onEvent(CategoryDetailUiEvent.OnConfirmDeleteMedia) }) {
+                    Text(
+                        text = stringResource(R.string.common_delete),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onEvent(CategoryDetailUiEvent.OnDismissDeleteMediaDialog) }) {
+                    Text(text = stringResource(R.string.category_dialog_cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
 private fun MediaSquareGrid(
     items: List<MediaItem>,
     selectedTab: MediaType,
-    onItemClick: (MediaItem, Int) -> Unit
+    onItemClick: (MediaItem, Int) -> Unit,
+    onItemLongClick: (MediaItem) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -303,7 +344,8 @@ private fun MediaSquareGrid(
         ) { index, item ->
             MediaSquareGridItem(
                 item = item,
-                onClick = { onItemClick(item, index) }
+                onClick = { onItemClick(item, index) },
+                onLongClick = { onItemLongClick(item) }
             )
         }
     }

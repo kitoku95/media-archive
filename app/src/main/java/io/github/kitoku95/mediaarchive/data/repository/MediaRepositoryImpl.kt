@@ -74,6 +74,12 @@ class MediaRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun isMediaAccessible(contentUri: String): Boolean = withContext(Dispatchers.IO) {
+        runCatching {
+            safMediaScanner.isUriAccessible(Uri.parse(contentUri))
+        }.getOrDefault(false)
+    }
+
     private suspend fun persistScannedMedia(
         categoryId: Long,
         scannedFiles: List<ScannedMediaFile>

@@ -7,6 +7,7 @@ import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.repository.MediaRepository
 import io.github.kitoku95.mediaarchive.domain.usecase.media.DeleteMediaItemUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.GetMediaByCategoryUseCase
+import io.github.kitoku95.mediaarchive.domain.usecase.media.IsMediaAccessibleUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -69,7 +70,8 @@ class VideoPlayerViewModelTest {
                 )
             ),
             getMediaByCategoryUseCase = GetMediaByCategoryUseCase(fakeRepository),
-            deleteMediaItemUseCase = DeleteMediaItemUseCase(fakeRepository)
+            deleteMediaItemUseCase = DeleteMediaItemUseCase(fakeRepository),
+            isMediaAccessibleUseCase = IsMediaAccessibleUseCase(fakeRepository)
         )
     }
 
@@ -181,6 +183,32 @@ class VideoPlayerViewModelTest {
             deletedIds.add(mediaItemId)
             itemsFlow.value = itemsFlow.value.filterNot { it.id == mediaItemId }
             return Result.success(Unit)
+        }
+
+        var isAccessibleResult: Boolean = false
+
+        override suspend fun isMediaAccessible(contentUri: String): Boolean = isAccessibleResult
+    }
+
+    @Test
+    fun `playback error on accessible video shows error without deleting from SQLite`() = runTest {
+        fakeRepository.isAccessibleResult = true
+
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.onEvent(VideoPlayerUiEvent.OnMediaFileMissing(11L))
+            advanceUntilIdle()
+            expectNoEvents()
+        }
+
+        assertEquals(emptyList<Long>(), fakeRepository.deletedIds)
+        viewModel.uiEffect.test {
+            assertEquals(
+                VideoPlayerUiEffect.ShowPlaybackError(displayName = "clip1.mp4"),
+                awaitItem()
+            )
         }
     }
 }

@@ -199,5 +199,37 @@ class ImageViewerViewModelTest {
             itemsFlow.value = itemsFlow.value.filterNot { it.id == mediaItemId }
             return Result.success(Unit)
         }
+
+        override suspend fun isMediaAccessible(contentUri: String): Boolean = false
+    }
+
+    @Test
+    fun `manual delete from image viewer removes item and navigates back when last image`() = runTest {
+        fakeRepository.setItems(listOf(imageOne))
+
+        viewModel.uiState.test {
+            awaitItem()
+            awaitItem()
+
+            viewModel.onEvent(ImageViewerUiEvent.OnDeleteClicked(imageOne))
+            assertEquals(imageOne, awaitItem().deleteConfirmationItem)
+
+            viewModel.onEvent(ImageViewerUiEvent.OnConfirmDelete)
+            advanceUntilIdle()
+
+            val updated = expectMostRecentItem()
+            assertEquals(null, updated.deleteConfirmationItem)
+            assertEquals(emptyList<MediaItem>(), updated.images)
+        }
+
+        viewModel.uiEffect.test {
+            assertEquals(
+                ImageViewerUiEffect.ShowDeleteSuccess(
+                    displayName = "photo1.jpg",
+                    shouldNavigateBack = true
+                ),
+                awaitItem()
+            )
+        }
     }
 }

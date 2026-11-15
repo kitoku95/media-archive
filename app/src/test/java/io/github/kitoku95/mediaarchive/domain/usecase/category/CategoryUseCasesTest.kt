@@ -21,6 +21,7 @@ class CategoryUseCasesTest {
     private val getCategoriesUseCase = GetCategoriesUseCase(repository)
     private val createCategoryUseCase = CreateCategoryUseCase(repository)
     private val verifyCategoryPasswordUseCase = VerifyCategoryPasswordUseCase(repository)
+    private val deleteCategoryUseCase = DeleteCategoryUseCase(repository)
 
     @Test
     fun `getCategoriesUseCase returns repository flow`() = runTest {
@@ -70,5 +71,15 @@ class CategoryUseCasesTest {
 
         assertTrue(verifyCategoryPasswordUseCase(2L, "a"))
         assertFalse(verifyCategoryPasswordUseCase(2L, "b"))
+    }
+
+    @Test
+    fun `deleteCategoryUseCase delegates to repository`() = runTest {
+        coEvery { repository.deleteCategory(2L) } returns Result.success(Unit)
+
+        val result = deleteCategoryUseCase(2L)
+
+        assertTrue(result.isSuccess)
+        coVerify(exactly = 1) { repository.deleteCategory(2L) }
     }
 }

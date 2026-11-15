@@ -111,6 +111,17 @@ class SafMediaScanner @Inject constructor(
         discovered
     }
 
+    suspend fun isUriAccessible(uri: Uri): Boolean = withContext(Dispatchers.IO) {
+        val canOpenDescriptor = runCatching {
+            context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { true } ?: false
+        }.getOrDefault(false)
+        if (canOpenDescriptor) return@withContext true
+
+        runCatching {
+            DocumentFile.fromSingleUri(context, uri)?.exists() == true
+        }.getOrDefault(false)
+    }
+
     private fun resolveMediaType(mimeType: String): MediaType? = when {
         mimeType.startsWith("image/", ignoreCase = true) -> MediaType.IMAGE
         mimeType.startsWith("video/", ignoreCase = true) -> MediaType.VIDEO

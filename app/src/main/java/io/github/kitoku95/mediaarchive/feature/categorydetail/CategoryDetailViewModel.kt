@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
+import io.github.kitoku95.mediaarchive.domain.usecase.media.DeleteMediaItemUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.GetMediaByCategoryUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.ImportFolderMediaUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.ImportSelectedMediaUseCase
@@ -30,7 +32,8 @@ class CategoryDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     getMediaByCategoryUseCase: GetMediaByCategoryUseCase,
     private val importSelectedMediaUseCase: ImportSelectedMediaUseCase,
-    private val importFolderMediaUseCase: ImportFolderMediaUseCase
+    private val importFolderMediaUseCase: ImportFolderMediaUseCase,
+    private val deleteMediaItemUseCase: DeleteMediaItemUseCase
 ) : ViewModel() {
 
     private val route: AppDestination.CategoryDetail = if (savedStateHandle.contains("categoryId")) {
@@ -47,7 +50,8 @@ class CategoryDetailViewModel @Inject constructor(
     private data class LocalUiState(
         val selectedTab: MediaType = MediaType.IMAGE,
         val isImporting: Boolean = false,
-        val isBrowseSheetVisible: Boolean = false
+        val isBrowseSheetVisible: Boolean = false,
+        val deleteConfirmationItem: MediaItem? = null
     )
 
     private val localUiState = MutableStateFlow(LocalUiState())
@@ -69,7 +73,8 @@ class CategoryDetailViewModel @Inject constructor(
             videos = videos,
             isLoading = false,
             isImporting = local.isImporting,
-            isBrowseSheetVisible = local.isBrowseSheetVisible
+            isBrowseSheetVisible = local.isBrowseSheetVisible,
+            deleteConfirmationItem = local.deleteConfirmationItem
         )
     }.stateIn(
         scope = viewModelScope,
@@ -135,6 +140,18 @@ class CategoryDetailViewModel @Inject constructor(
                     )
                 )
             }
+
+            is CategoryDetailUiEvent.OnDeleteMediaClicked -> {
+                localUiState.update { it.copy(deleteConfirmationItem = event.mediaItem) }
+            }
+
+            CategoryDetailUiEvent.OnDismissDeleteMediaDialog -> {
+                localUiState.update { it.copy(deleteConfirmationItem = null) }
+            }
+
+            CategoryDetailUiEvent.OnConfirmDeleteMedia -> {
+                deleteSelectedMedia()
+            }
         }
     }
 
@@ -157,6 +174,20 @@ class CategoryDetailViewModel @Inject constructor(
                 .onSuccess { count -> emitImportCount(count) }
                 .onFailure { _uiEffect.send(CategoryDetailUiEffect.ShowImportError) }
             localUiState.update { it.copy(isImporting = false) }
+        }
+    }
+
+    private fun deleteSelectedMedia() {
+        val target = localUiState.value.deleteConfirmationItem ?: return
+        localUiState.update { it.copy(deleteConfirmationItem = null) }
+        viewModelScope.launch {
+            deleteMediaItemUseCase(target.id)
+                .onSuccess {
+                    _uiEffect.send(CategoryDetailUiEffect.ShowDeleteMediaSuccess(target.displayName))
+                }
+                .onFailure {
+                    _uiEffect.send(CategoryDetailUiEffect.ShowDeleteMediaError)
+                }
         }
     }
 

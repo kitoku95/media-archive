@@ -21,6 +21,8 @@ class MediaUseCasesTest {
     private lateinit var getMediaByCategoryUseCase: GetMediaByCategoryUseCase
     private lateinit var importSelectedMediaUseCase: ImportSelectedMediaUseCase
     private lateinit var importFolderMediaUseCase: ImportFolderMediaUseCase
+    private lateinit var deleteMediaItemUseCase: DeleteMediaItemUseCase
+    private lateinit var isMediaAccessibleUseCase: IsMediaAccessibleUseCase
 
     @Before
     fun setUp() {
@@ -28,6 +30,8 @@ class MediaUseCasesTest {
         getMediaByCategoryUseCase = GetMediaByCategoryUseCase(mediaRepository)
         importSelectedMediaUseCase = ImportSelectedMediaUseCase(mediaRepository)
         importFolderMediaUseCase = ImportFolderMediaUseCase(mediaRepository)
+        deleteMediaItemUseCase = DeleteMediaItemUseCase(mediaRepository)
+        isMediaAccessibleUseCase = IsMediaAccessibleUseCase(mediaRepository)
     }
 
     @Test
@@ -93,5 +97,33 @@ class MediaUseCasesTest {
         assertTrue(result.isSuccess)
         assertEquals(5, result.getOrNull())
         coVerify(exactly = 1) { mediaRepository.importFolderMedia(2L, treeUri) }
+    }
+
+    @Test
+    fun `deleteMediaItemUseCase delegates to repository`() = runTest {
+        coEvery { mediaRepository.deleteMediaItem(7L) } returns Result.success(Unit)
+
+        val result = deleteMediaItemUseCase(7L)
+
+        assertTrue(result.isSuccess)
+        coVerify(exactly = 1) { mediaRepository.deleteMediaItem(7L) }
+    }
+
+    @Test
+    fun `isMediaAccessibleUseCase returns false for blank uri without calling repository`() = runTest {
+        val result = isMediaAccessibleUseCase("   ")
+
+        assertEquals(false, result)
+        coVerify(exactly = 0) { mediaRepository.isMediaAccessible(any()) }
+    }
+
+    @Test
+    fun `isMediaAccessibleUseCase delegates non-blank uri to repository`() = runTest {
+        coEvery { mediaRepository.isMediaAccessible("content://media/1") } returns true
+
+        val result = isMediaAccessibleUseCase("content://media/1")
+
+        assertTrue(result)
+        coVerify(exactly = 1) { mediaRepository.isMediaAccessible("content://media/1") }
     }
 }

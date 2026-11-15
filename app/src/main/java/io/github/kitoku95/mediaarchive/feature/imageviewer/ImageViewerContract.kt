@@ -12,7 +12,8 @@ data class ImageViewerUiState(
     val images: List<MediaItem> = emptyList(),
     val initialIndex: Int = 0,
     val isOverlayVisible: Boolean = true,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val deleteConfirmationItem: MediaItem? = null
 )
 
 /**
@@ -22,6 +23,9 @@ sealed interface ImageViewerUiEvent {
     data object OnBackClicked : ImageViewerUiEvent
     data object OnToggleOverlay : ImageViewerUiEvent
     data class OnMediaFileMissing(val mediaItem: MediaItem) : ImageViewerUiEvent
+    data class OnDeleteClicked(val mediaItem: MediaItem) : ImageViewerUiEvent
+    data object OnDismissDeleteDialog : ImageViewerUiEvent
+    data object OnConfirmDelete : ImageViewerUiEvent
 }
 
 /**
@@ -33,4 +37,9 @@ sealed interface ImageViewerUiEffect {
         val displayName: String,
         val shouldNavigateBack: Boolean
     ) : ImageViewerUiEffect
+    data class ShowDeleteSuccess(
+        val displayName: String,
+        val shouldNavigateBack: Boolean
+    ) : ImageViewerUiEffect
+    data object ShowDeleteError : ImageViewerUiEffect
 }

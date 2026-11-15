@@ -31,4 +31,5 @@ sealed interface VideoPlayerUiEffect {
         val displayName: String,
         val shouldNavigateBack: Boolean
     ) : VideoPlayerUiEffect
+    data class ShowPlaybackError(val displayName: String) : VideoPlayerUiEffect
 }

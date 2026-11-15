@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.usecase.media.DeleteMediaItemUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.GetMediaByCategoryUseCase
+import io.github.kitoku95.mediaarchive.domain.usecase.media.IsMediaAccessibleUseCase
 import io.github.kitoku95.mediaarchive.navigation.AppDestination
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +26,8 @@ import javax.inject.Inject
 class VideoPlayerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     getMediaByCategoryUseCase: GetMediaByCategoryUseCase,
-    private val deleteMediaItemUseCase: DeleteMediaItemUseCase
+    private val deleteMediaItemUseCase: DeleteMediaItemUseCase,
+    private val isMediaAccessibleUseCase: IsMediaAccessibleUseCase
 ) : ViewModel() {
 
     private val route: AppDestination.VideoPlayer = if (savedStateHandle.contains("categoryId")) {
@@ -80,6 +82,16 @@ class VideoPlayerViewModel @Inject constructor(
         viewModelScope.launch {
             val currentVideos = uiState.value.videos
             val missingItem = currentVideos.firstOrNull { it.id == mediaItemId }
+            val isStillAccessible = missingItem != null && isMediaAccessibleUseCase(missingItem.contentUri)
+            if (isStillAccessible) {
+                _uiEffect.send(
+                    VideoPlayerUiEffect.ShowPlaybackError(
+                        displayName = missingItem?.displayName.orEmpty()
+                    )
+                )
+                return@launch
+            }
+
             val remainingCount = currentVideos.count { it.id != mediaItemId }
             deleteMediaItemUseCase(mediaItemId)
             _uiEffect.send(

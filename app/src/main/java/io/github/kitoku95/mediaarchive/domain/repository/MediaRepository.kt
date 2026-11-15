@@ -25,4 +25,6 @@ interface MediaRepository {
     ): Result<Int>
 
     suspend fun deleteMediaItem(mediaItemId: Long): Result<Unit>
+
+    suspend fun isMediaAccessible(contentUri: String): Boolean
 }

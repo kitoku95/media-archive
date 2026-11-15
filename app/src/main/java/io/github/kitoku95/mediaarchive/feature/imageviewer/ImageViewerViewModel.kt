@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.usecase.media.DeleteMediaItemUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.media.GetMediaByCategoryUseCase
@@ -40,6 +41,7 @@ class ImageViewerViewModel @Inject constructor(
     }
 
     private val isOverlayVisible = MutableStateFlow(true)
+    private val deleteConfirmationItem = MutableStateFlow<MediaItem?>(null)
     private val handledMissingIds = mutableSetOf<Long>()
 
     private val _uiEffect = Channel<ImageViewerUiEffect>(Channel.BUFFERED)
@@ -47,14 +49,16 @@ class ImageViewerViewModel @Inject constructor(
 
     val uiState: StateFlow<ImageViewerUiState> = combine(
         getMediaByCategoryUseCase(route.categoryId, MediaType.IMAGE),
-        isOverlayVisible
-    ) { images, overlayVisible ->
+        isOverlayVisible,
+        deleteConfirmationItem
+    ) { images, overlayVisible, deleteCandidate ->
         ImageViewerUiState(
             categoryId = route.categoryId,
             images = images,
             initialIndex = route.initialIndex,
             isOverlayVisible = overlayVisible,
-            isLoading = false
+            isLoading = false,
+            deleteConfirmationItem = deleteCandidate
         )
     }.stateIn(
         scope = viewModelScope,
@@ -79,6 +83,38 @@ class ImageViewerViewModel @Inject constructor(
             is ImageViewerUiEvent.OnMediaFileMissing -> {
                 handleMissingMedia(event)
             }
+
+            is ImageViewerUiEvent.OnDeleteClicked -> {
+                deleteConfirmationItem.value = event.mediaItem
+            }
+
+            ImageViewerUiEvent.OnDismissDeleteDialog -> {
+                deleteConfirmationItem.value = null
+            }
+
+            ImageViewerUiEvent.OnConfirmDelete -> {
+                confirmDeleteMedia()
+            }
+        }
+    }
+
+    private fun confirmDeleteMedia() {
+        val item = deleteConfirmationItem.value ?: return
+        deleteConfirmationItem.value = null
+        viewModelScope.launch {
+            val remainingCount = uiState.value.images.count { it.id != item.id }
+            deleteMediaItemUseCase(item.id)
+                .onSuccess {
+                    _uiEffect.send(
+                        ImageViewerUiEffect.ShowDeleteSuccess(
+                            displayName = item.displayName,
+                            shouldNavigateBack = remainingCount == 0
+                        )
+                    )
+                }
+                .onFailure {
+                    _uiEffect.send(ImageViewerUiEffect.ShowDeleteError)
+                }
         }
     }
 

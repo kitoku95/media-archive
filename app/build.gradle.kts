@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mediaarchive.app"
+    namespace = "io.github.kitoku95.mediaarchive"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.mediaarchive.app"
+        applicationId = "io.github.kitoku95.mediaarchive"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

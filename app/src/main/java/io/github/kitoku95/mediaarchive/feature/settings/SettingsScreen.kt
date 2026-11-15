@@ -152,8 +152,13 @@ fun SettingsScreen(
                             ),
                             selected = uiState.selectedDarkMode == mode,
                             onClick = { onEvent(SettingsUiEvent.OnDarkModeSelected(mode)) },
+                            icon = {},
                             label = {
-                                Text(text = darkModeLabel(mode))
+                                Text(
+                                    text = darkModeLabel(mode),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         )
                     }

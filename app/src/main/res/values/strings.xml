@@ -32,7 +32,22 @@
     <string name="category_unlock_confirm">Unlock</string>
     <string name="category_unlock_error_incorrect">Incorrect password. Please try again.</string>
 
-    <string name="category_detail_placeholder_hint">Category unlocked. The Images &amp; Videos grid and storage browser will appear here.</string>
+    <!-- Category Detail & SAF Browser -->
+    <string name="category_detail_tab_images">Images</string>
+    <string name="category_detail_tab_videos">Videos</string>
+    <string name="category_detail_btn_browse_storage">Browse Storage</string>
+    <string name="category_detail_browse_sheet_title">Add Media to Category</string>
+    <string name="category_detail_browse_files">Select Images / Videos</string>
+    <string name="category_detail_browse_files_desc">Pick one or more photos and videos from storage</string>
+    <string name="category_detail_browse_folder">Select Folder</string>
+    <string name="category_detail_browse_folder_desc">Import all photos and videos inside a chosen folder</string>
+    <string name="category_detail_empty_images">No images in this category yet.\nTap Browse Storage to add photos.</string>
+    <string name="category_detail_empty_videos">No videos in this category yet.\nTap Browse Storage to add videos.</string>
+    <string name="category_detail_importing">Importing media &amp; generating thumbnails…</string>
+    <string name="category_detail_import_success">Added %1$d media item(s).</string>
+    <string name="category_detail_import_empty">No new media items were added.</string>
+    <string name="category_detail_import_error">Could not import selected media. Please try again.</string>
+    <string name="category_detail_viewer_coming_soon">Full-screen viewer will be available in the next phase.</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>

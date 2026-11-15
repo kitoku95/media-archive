@@ -32,7 +32,22 @@
     <string name="category_unlock_confirm">Mở khóa</string>
     <string name="category_unlock_error_incorrect">Mật khẩu không đúng. Vui lòng thử lại.</string>
 
-    <string name="category_detail_placeholder_hint">Đã mở danh mục. Lưới Ảnh &amp; Video và nút Duyệt bộ nhớ sẽ hiển thị tại đây.</string>
+    <!-- Category Detail & SAF Browser -->
+    <string name="category_detail_tab_images">Ảnh</string>
+    <string name="category_detail_tab_videos">Video</string>
+    <string name="category_detail_btn_browse_storage">Duyệt bộ nhớ</string>
+    <string name="category_detail_browse_sheet_title">Thêm media vào danh mục</string>
+    <string name="category_detail_browse_files">Chọn Ảnh / Video</string>
+    <string name="category_detail_browse_files_desc">Chọn một hoặc nhiều ảnh và video từ bộ nhớ</string>
+    <string name="category_detail_browse_folder">Chọn Thư mục</string>
+    <string name="category_detail_browse_folder_desc">Nhập tất cả ảnh và video trong thư mục đã chọn</string>
+    <string name="category_detail_empty_images">Chưa có ảnh nào trong danh mục này.\nNhấn Duyệt bộ nhớ để thêm ảnh.</string>
+    <string name="category_detail_empty_videos">Chưa có video nào trong danh mục này.\nNhấn Duyệt bộ nhớ để thêm video.</string>
+    <string name="category_detail_importing">Đang nhập media &amp; tạo ảnh thu nhỏ…</string>
+    <string name="category_detail_import_success">Đã thêm %1$d mục media.</string>
+    <string name="category_detail_import_empty">Không có mục media mới nào được thêm.</string>
+    <string name="category_detail_import_error">Không thể nhập media đã chọn. Vui lòng thử lại.</string>
+    <string name="category_detail_viewer_coming_soon">Trình xem toàn màn hình sẽ có trong giai đoạn tiếp theo.</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Cài đặt</string>

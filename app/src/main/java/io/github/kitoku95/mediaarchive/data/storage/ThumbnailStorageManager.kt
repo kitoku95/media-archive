@@ -73,25 +73,20 @@ class ThumbnailStorageManager @Inject constructor(
     }
 
     suspend fun deleteThumbnail(thumbnailPath: String) = withContext(Dispatchers.IO) {
-        if (thumbnailPath.isBlank()) return@withContext
-        runCatching {
-            val file = File(thumbnailPath)
-            if (file.exists()) {
-                file.delete()
-            }
-        }
-        Unit
+        deleteIfInsideThumbnailsDir(thumbnailPath)
     }
 
     suspend fun deleteThumbnails(thumbnailPaths: List<String>) = withContext(Dispatchers.IO) {
-        thumbnailPaths.forEach { path ->
-            if (path.isNotBlank()) {
-                runCatching {
-                    val file = File(path)
-                    if (file.exists()) {
-                        file.delete()
-                    }
-                }
+        thumbnailPaths.forEach(::deleteIfInsideThumbnailsDir)
+    }
+
+    private fun deleteIfInsideThumbnailsDir(thumbnailPath: String) {
+        if (thumbnailPath.isBlank()) return
+        runCatching {
+            val baseCanonical = thumbnailsDir.canonicalPath + File.separator
+            val target = File(thumbnailPath)
+            if (target.canonicalPath.startsWith(baseCanonical) && target.exists()) {
+                target.delete()
             }
         }
     }

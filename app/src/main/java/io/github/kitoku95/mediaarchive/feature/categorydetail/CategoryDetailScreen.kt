@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.kitoku95.mediaarchive.R
+import io.github.kitoku95.mediaarchive.core.security.PrivateScreenProtectionEffect
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.feature.categorydetail.component.BrowseStorageBottomSheet
@@ -64,13 +65,15 @@ import io.github.kitoku95.mediaarchive.feature.categorydetail.component.MediaSqu
 @Composable
 fun CategoryDetailRoute(
     onNavigateBack: () -> Unit,
-    onNavigateToImageViewer: (categoryId: Long, initialIndex: Int) -> Unit,
-    onNavigateToVideoPlayer: (categoryId: Long, initialIndex: Int) -> Unit,
+    onNavigateToImageViewer: (categoryId: Long, initialIndex: Int, isPrivate: Boolean) -> Unit,
+    onNavigateToVideoPlayer: (categoryId: Long, initialIndex: Int, isPrivate: Boolean) -> Unit,
     viewModel: CategoryDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    PrivateScreenProtectionEffect(isPrivate = uiState.isPrivate)
 
     val openMultipleDocumentsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
@@ -101,10 +104,10 @@ fun CategoryDetailRoute(
                     openDocumentTreeLauncher.launch(null)
                 }
                 is CategoryDetailUiEffect.NavigateToImageViewer -> {
-                    onNavigateToImageViewer(effect.categoryId, effect.initialIndex)
+                    onNavigateToImageViewer(effect.categoryId, effect.initialIndex, effect.isPrivate)
                 }
                 is CategoryDetailUiEffect.NavigateToVideoPlayer -> {
-                    onNavigateToVideoPlayer(effect.categoryId, effect.initialIndex)
+                    onNavigateToVideoPlayer(effect.categoryId, effect.initialIndex, effect.isPrivate)
                 }
                 is CategoryDetailUiEffect.ShowImportSuccess -> {
                     snackbarHostState.showSnackbar(

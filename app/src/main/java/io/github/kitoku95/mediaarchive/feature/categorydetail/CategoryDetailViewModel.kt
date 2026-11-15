@@ -127,7 +127,8 @@ class CategoryDetailViewModel @Inject constructor(
                 _uiEffect.trySend(
                     CategoryDetailUiEffect.NavigateToImageViewer(
                         categoryId = categoryId,
-                        initialIndex = event.index
+                        initialIndex = event.index,
+                        isPrivate = route.isPrivate
                     )
                 )
             }
@@ -136,7 +137,8 @@ class CategoryDetailViewModel @Inject constructor(
                 _uiEffect.trySend(
                     CategoryDetailUiEffect.NavigateToVideoPlayer(
                         categoryId = categoryId,
-                        initialIndex = event.index
+                        initialIndex = event.index,
+                        isPrivate = route.isPrivate
                     )
                 )
             }

@@ -11,6 +11,7 @@ data class ImageViewerUiState(
     val categoryId: Long = 0L,
     val images: List<MediaItem> = emptyList(),
     val initialIndex: Int = 0,
+    val isPrivate: Boolean = false,
     val isOverlayVisible: Boolean = true,
     val isLoading: Boolean = true,
     val deleteConfirmationItem: MediaItem? = null

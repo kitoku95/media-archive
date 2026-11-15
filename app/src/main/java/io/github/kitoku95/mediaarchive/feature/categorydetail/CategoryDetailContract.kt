@@ -47,8 +47,16 @@ sealed interface CategoryDetailUiEffect {
     data object NavigateBack : CategoryDetailUiEffect
     data object LaunchFilePicker : CategoryDetailUiEffect
     data object LaunchFolderPicker : CategoryDetailUiEffect
-    data class NavigateToImageViewer(val categoryId: Long, val initialIndex: Int) : CategoryDetailUiEffect
-    data class NavigateToVideoPlayer(val categoryId: Long, val initialIndex: Int) : CategoryDetailUiEffect
+    data class NavigateToImageViewer(
+        val categoryId: Long,
+        val initialIndex: Int,
+        val isPrivate: Boolean = false
+    ) : CategoryDetailUiEffect
+    data class NavigateToVideoPlayer(
+        val categoryId: Long,
+        val initialIndex: Int,
+        val isPrivate: Boolean = false
+    ) : CategoryDetailUiEffect
     data class ShowImportSuccess(val importedCount: Int) : CategoryDetailUiEffect
     data object ShowImportEmpty : CategoryDetailUiEffect
     data object ShowImportError : CategoryDetailUiEffect

@@ -66,7 +66,8 @@ class VideoPlayerViewModelTest {
             savedStateHandle = SavedStateHandle(
                 mapOf(
                     "categoryId" to 20L,
-                    "initialIndex" to 1
+                    "initialIndex" to 1,
+                    "isPrivate" to true
                 )
             ),
             getMediaByCategoryUseCase = GetMediaByCategoryUseCase(fakeRepository),
@@ -90,6 +91,7 @@ class VideoPlayerViewModelTest {
             assertFalse(loaded.isLoading)
             assertEquals(20L, loaded.categoryId)
             assertEquals(1, loaded.initialIndex)
+            assertTrue(loaded.isPrivate)
             assertEquals(listOf(videoOne, videoTwo), loaded.videos)
         }
     }

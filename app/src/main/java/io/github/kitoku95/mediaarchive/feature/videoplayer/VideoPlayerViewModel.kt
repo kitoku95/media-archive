@@ -33,7 +33,8 @@ class VideoPlayerViewModel @Inject constructor(
     private val route: AppDestination.VideoPlayer = if (savedStateHandle.contains("categoryId")) {
         AppDestination.VideoPlayer(
             categoryId = savedStateHandle.get<Number>("categoryId")?.toLong() ?: 0L,
-            initialIndex = savedStateHandle.get<Number>("initialIndex")?.toInt() ?: 0
+            initialIndex = savedStateHandle.get<Number>("initialIndex")?.toInt() ?: 0,
+            isPrivate = savedStateHandle.get<Boolean>("isPrivate") ?: false
         )
     } else {
         savedStateHandle.toRoute<AppDestination.VideoPlayer>()
@@ -52,6 +53,7 @@ class VideoPlayerViewModel @Inject constructor(
             categoryId = route.categoryId,
             videos = videos,
             initialIndex = route.initialIndex,
+            isPrivate = route.isPrivate,
             isLoading = false
         )
     }.stateIn(
@@ -60,6 +62,7 @@ class VideoPlayerViewModel @Inject constructor(
         initialValue = VideoPlayerUiState(
             categoryId = route.categoryId,
             initialIndex = route.initialIndex,
+            isPrivate = route.isPrivate,
             isLoading = true
         )
     )

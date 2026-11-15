@@ -11,6 +11,7 @@ data class VideoPlayerUiState(
     val categoryId: Long = 0L,
     val videos: List<MediaItem> = emptyList(),
     val initialIndex: Int = 0,
+    val isPrivate: Boolean = false,
     val isLoading: Boolean = true
 )
 

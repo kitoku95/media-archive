@@ -6,12 +6,33 @@
     <string name="common_back">Back</string>
     <string name="common_version_format">Version %1$s</string>
 
-    <!-- Home / Category List Placeholder (Phase 1) -->
+    <!-- Home / Category List & Dialogs -->
     <string name="category_list_title">Categories</string>
     <string name="category_default_name">Main</string>
     <string name="category_mode_public">Public</string>
     <string name="category_mode_private">Private</string>
-    <string name="category_list_phase_hint">Select a category to organize your photos and videos. Full category management and media browsing will be available here.</string>
+    <string name="category_add_button">New Category</string>
+    <string name="category_create_dialog_title">Create Category</string>
+    <string name="category_name_label">Category Name</string>
+    <string name="category_name_placeholder">e.g. Travel, Family</string>
+    <string name="category_access_mode_label">Access Mode</string>
+    <string name="category_password_label">Password</string>
+    <string name="category_password_placeholder">Enter any non-empty password</string>
+    <string name="category_password_show">Show password</string>
+    <string name="category_password_hide">Hide password</string>
+    <string name="category_create_confirm">Create</string>
+    <string name="category_dialog_cancel">Cancel</string>
+    <string name="category_error_blank_name">Category name cannot be empty.</string>
+    <string name="category_error_duplicate_name">A category with this name already exists.</string>
+    <string name="category_error_empty_password">Please enter a password for this private category.</string>
+    <string name="category_error_generic">Could not create category. Please try again.</string>
+
+    <string name="category_unlock_dialog_title">Unlock %1$s</string>
+    <string name="category_unlock_dialog_subtitle">Enter the password to open this private category.</string>
+    <string name="category_unlock_confirm">Unlock</string>
+    <string name="category_unlock_error_incorrect">Incorrect password. Please try again.</string>
+
+    <string name="category_detail_placeholder_hint">Category unlocked. The Images &amp; Videos grid and storage browser will appear here.</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>

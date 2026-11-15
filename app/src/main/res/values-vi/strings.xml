@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MediaArchive</string>
+
+    <!-- Navigation & Common -->
+    <string name="common_back">Quay lại</string>
+    <string name="common_version_format">Phiên bản %1$s</string>
+
+    <!-- Home / Category List Placeholder (Phase 1) -->
+    <string name="category_list_title">Danh mục</string>
+    <string name="category_default_name">Main</string>
+    <string name="category_mode_public">Công khai (Public)</string>
+    <string name="category_mode_private">Riêng tư (Private)</string>
+    <string name="category_list_phase_hint">Chọn một danh mục để sắp xếp ảnh và video của bạn. Tính năng quản lý danh mục và duyệt bộ nhớ đầy đủ sẽ được cập nhật tại đây.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_theme_label">Tông màu giao diện</string>
+    <string name="settings_theme_neutral_taupe">Trung tính (Taupe)</string>
+    <string name="settings_theme_neutral_taupe_desc">Trắng, đen và xám nâu dịu mắt</string>
+    <string name="settings_theme_deep_crimson">Đỏ thẫm (Deep Crimson)</string>
+    <string name="settings_theme_deep_crimson_desc">Tông đỏ rượu vang đậm sang trọng</string>
+    <string name="settings_theme_deep_forest">Xanh rừng thẫm (Deep Forest)</string>
+    <string name="settings_theme_deep_forest_desc">Tông xanh lục bảo và xanh thông trầm</string>
+    <string name="settings_theme_deep_sapphire">Xanh sapphire (Deep Sapphire)</string>
+    <string name="settings_theme_deep_sapphire_desc">Tông xanh navy và xanh đêm sâu lắng</string>
+
+    <string name="settings_appearance_label">Chế độ hiển thị</string>
+    <string name="settings_appearance_system">Theo hệ thống</string>
+    <string name="settings_appearance_light">Sáng</string>
+    <string name="settings_appearance_dark">Tối</string>
+
+    <string name="settings_language_label">Ngôn ngữ</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_language_japanese">日本語</string>
+
+    <string name="settings_about_section_label">Thông tin</string>
+    <string name="settings_about_item">Giới thiệu MediaArchive</string>
+    <string name="settings_about_item_subtitle">Tìm hiểu các tính năng của ứng dụng</string>
+
+    <!-- About Screen (Strict HR-07: User-facing features only, no tech jargon) -->
+    <string name="about_title">Giới thiệu</string>
+    <string name="about_tagline">Không gian lưu trữ và xem ảnh, video gọn gàng</string>
+    <string name="about_description">Sắp xếp và thưởng thức ảnh, video cá nhân theo từng danh mục riêng biệt phù hợp với nhu cầu của bạn. Chỉ thêm những tệp hoặc thư mục bạn trực tiếp lựa chọn mà không tự động quét toàn bộ thiết bị. Bảo vệ các bộ sưu tập nhạy cảm trong danh mục riêng tư bằng mật khẩu của riêng bạn.</string>
+    <string name="about_feature_organize">Phân loại ảnh và video theo từng danh mục rõ ràng</string>
+    <string name="about_feature_manual">Chủ động chọn lọc từng tệp hoặc thư mục muốn thêm</string>
+    <string name="about_feature_privacy">Khóa các danh mục riêng tư bằng mật khẩu cá nhân</string>
+</resources>

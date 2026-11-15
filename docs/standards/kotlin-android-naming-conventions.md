@@ -8,7 +8,7 @@ This document defines the naming and coding standards across the **MediaArchive*
 
 | Element | Case Style | Mandatory Rule / Suffix | Good Example | Bad Example |
 | :--- | :--- | :--- | :--- | :--- |
-| **Package** | `lowercase` | Lowercase alphanumeric, no underscores | `com.mediaarchive.app.feature.categorydetail` | `com.mediaarchive.app.feature.category_detail` |
+| **Package** | `lowercase` | Lowercase alphanumeric, no underscores | `io.github.kitoku95.mediaarchive.feature.categorydetail` | `io.github.kitoku95.mediaarchive.feature.category_detail` |
 | **Class / Interface / Enum** | `PascalCase` | Noun or noun phrase | `Category`, `MediaItem`, `AppThemePalette` | `category`, `Media_Item` |
 | **Kotlin Class File** | `PascalCase.kt` | Matches the primary class name | `CategoryDetailViewModel.kt` | `categoryDetailVM.kt` |
 | **Extension Function File** | `PascalCaseExt.kt` | `<ReceiverType>Ext.kt` | `UriExt.kt`, `ContextExt.kt` | `Utils.kt`, `Helper.kt` |

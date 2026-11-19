@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.usecase.media.DeleteMediaItemUseCase
@@ -24,8 +25,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Manages the state of [CategoryDetailScreen], including Image/Video tab selection
- * and manual SAF file/folder media ingestion.
+ * Manages the state of [CategoryDetailScreen], including Images/Videos/Documents tabs
+ * and manual SAF file/folder ingestion (flattening nested subfolder files directly into the category).
  */
 @HiltViewModel
 class CategoryDetailViewModel @Inject constructor(
@@ -62,8 +63,9 @@ class CategoryDetailViewModel @Inject constructor(
     val uiState: StateFlow<CategoryDetailUiState> = combine(
         getMediaByCategoryUseCase(categoryId, MediaType.IMAGE),
         getMediaByCategoryUseCase(categoryId, MediaType.VIDEO),
+        getMediaByCategoryUseCase(categoryId, MediaType.DOCUMENT),
         localUiState
-    ) { images, videos, local ->
+    ) { images, videos, documents, local ->
         CategoryDetailUiState(
             categoryId = categoryId,
             categoryName = route.categoryName,
@@ -71,6 +73,7 @@ class CategoryDetailViewModel @Inject constructor(
             selectedTab = local.selectedTab,
             images = images,
             videos = videos,
+            documents = documents,
             isLoading = false,
             isImporting = local.isImporting,
             isBrowseSheetVisible = local.isBrowseSheetVisible,
@@ -143,6 +146,16 @@ class CategoryDetailViewModel @Inject constructor(
                 )
             }
 
+            is CategoryDetailUiEvent.OnDocumentClicked -> {
+                _uiEffect.trySend(
+                    CategoryDetailUiEffect.OpenDocumentExternally(
+                        contentUri = event.mediaItem.contentUri,
+                        mimeType = event.mediaItem.mimeType,
+                        displayName = event.mediaItem.displayName
+                    )
+                )
+            }
+
             is CategoryDetailUiEvent.OnDeleteMediaClicked -> {
                 localUiState.update { it.copy(deleteConfirmationItem = event.mediaItem) }
             }
@@ -162,7 +175,7 @@ class CategoryDetailViewModel @Inject constructor(
         viewModelScope.launch {
             localUiState.update { it.copy(isImporting = true) }
             importSelectedMediaUseCase(categoryId = categoryId, uriStrings = uris)
-                .onSuccess { count -> emitImportCount(count) }
+                .onSuccess { result -> emitImportResult(result) }
                 .onFailure { _uiEffect.send(CategoryDetailUiEffect.ShowImportError) }
             localUiState.update { it.copy(isImporting = false) }
         }
@@ -173,7 +186,7 @@ class CategoryDetailViewModel @Inject constructor(
         viewModelScope.launch {
             localUiState.update { it.copy(isImporting = true) }
             importFolderMediaUseCase(categoryId = categoryId, treeUriString = treeUri)
-                .onSuccess { count -> emitImportCount(count) }
+                .onSuccess { result -> emitImportResult(result) }
                 .onFailure { _uiEffect.send(CategoryDetailUiEffect.ShowImportError) }
             localUiState.update { it.copy(isImporting = false) }
         }
@@ -193,9 +206,14 @@ class CategoryDetailViewModel @Inject constructor(
         }
     }
 
-    private suspend fun emitImportCount(count: Int) {
-        if (count > 0) {
-            _uiEffect.send(CategoryDetailUiEffect.ShowImportSuccess(count))
+    private suspend fun emitImportResult(result: ImportResult) {
+        if (result.importedCount > 0 || result.skippedDuplicateCount > 0) {
+            _uiEffect.send(
+                CategoryDetailUiEffect.ShowImportResult(
+                    importedCount = result.importedCount,
+                    skippedDuplicateCount = result.skippedDuplicateCount
+                )
+            )
         } else {
             _uiEffect.send(CategoryDetailUiEffect.ShowImportEmpty)
         }

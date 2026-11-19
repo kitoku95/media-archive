@@ -28,7 +28,7 @@ interface MediaItemDao {
     @Query("SELECT * FROM media_items WHERE id = :id LIMIT 1")
     suspend fun getMediaItemById(id: Long): MediaItemEntity?
 
-    @Query("SELECT thumbnail_path FROM media_items WHERE category_id = :categoryId")
+    @Query("SELECT thumbnail_path FROM media_items WHERE category_id = :categoryId AND thumbnail_path != ''")
     suspend fun getThumbnailPathsByCategory(categoryId: Long): List<String>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -38,11 +38,11 @@ interface MediaItemDao {
         """
         SELECT EXISTS(
             SELECT 1 FROM media_items
-            WHERE category_id = :categoryId AND content_uri = :contentUri
+            WHERE category_id = :categoryId AND canonical_id = :canonicalId
         )
         """
     )
-    suspend fun existsInCategory(categoryId: Long, contentUri: String): Boolean
+    suspend fun existsByCanonicalId(categoryId: Long, canonicalId: String): Boolean
 
     @Query("DELETE FROM media_items WHERE id = :id")
     suspend fun deleteMediaItemById(id: Long): Int

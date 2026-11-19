@@ -7,11 +7,7 @@ import io.github.kitoku95.mediaarchive.domain.model.MediaType
 fun MediaItemEntity.toDomain(): MediaItem = MediaItem(
     id = id,
     categoryId = categoryId,
-    mediaType = if (mediaType == MediaType.VIDEO.name) {
-        MediaType.VIDEO
-    } else {
-        MediaType.IMAGE
-    },
+    mediaType = runCatching { MediaType.valueOf(mediaType) }.getOrDefault(MediaType.IMAGE),
     contentUri = contentUri,
     thumbnailPath = thumbnailPath,
     displayName = displayName,

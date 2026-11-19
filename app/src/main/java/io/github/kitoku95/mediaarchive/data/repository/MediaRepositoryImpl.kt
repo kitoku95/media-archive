@@ -4,9 +4,11 @@ import android.net.Uri
 import io.github.kitoku95.mediaarchive.data.local.dao.MediaItemDao
 import io.github.kitoku95.mediaarchive.data.local.entity.MediaItemEntity
 import io.github.kitoku95.mediaarchive.data.mapper.toDomain
+import io.github.kitoku95.mediaarchive.data.storage.SafCanonicalIdResolver
 import io.github.kitoku95.mediaarchive.data.storage.SafMediaScanner
 import io.github.kitoku95.mediaarchive.data.storage.ScannedMediaFile
 import io.github.kitoku95.mediaarchive.data.storage.ThumbnailStorageManager
+import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.repository.MediaRepository
@@ -21,6 +23,7 @@ import javax.inject.Singleton
 class MediaRepositoryImpl @Inject constructor(
     private val mediaItemDao: MediaItemDao,
     private val safMediaScanner: SafMediaScanner,
+    private val canonicalIdResolver: SafCanonicalIdResolver,
     private val thumbnailStorageManager: ThumbnailStorageManager
 ) : MediaRepository {
 
@@ -39,29 +42,59 @@ class MediaRepositoryImpl @Inject constructor(
     override suspend fun importSelectedMedia(
         categoryId: Long,
         uriStrings: List<String>
-    ): Result<Int> = withContext(Dispatchers.IO) {
+    ): Result<ImportResult> = withContext(Dispatchers.IO) {
         runCatching {
-            val scannedFiles = uriStrings.mapNotNull { uriString ->
-                if (mediaItemDao.existsInCategory(categoryId, uriString)) {
-                    null
-                } else {
-                    safMediaScanner.inspectSingleFile(Uri.parse(uriString))
+            val seenCanonicalIds = HashSet<String>()
+            var skippedDuplicates = 0
+            val scannedFiles = mutableListOf<ScannedMediaFile>()
+
+            for (uriString in uriStrings) {
+                val uri = Uri.parse(uriString)
+                val canonicalId = canonicalIdResolver.resolve(uri)
+                if (!seenCanonicalIds.add(canonicalId) ||
+                    mediaItemDao.existsByCanonicalId(categoryId, canonicalId)
+                ) {
+                    skippedDuplicates++
+                    continue
+                }
+                safMediaScanner.inspectSingleFile(uri)?.let { scanned ->
+                    scannedFiles.add(scanned)
                 }
             }
-            persistScannedMedia(categoryId, scannedFiles)
+
+            persistScannedMedia(
+                categoryId = categoryId,
+                scannedFiles = scannedFiles,
+                initialSkippedDuplicates = skippedDuplicates
+            )
         }
     }
 
     override suspend fun importFolderMedia(
         categoryId: Long,
         treeUriString: String
-    ): Result<Int> = withContext(Dispatchers.IO) {
+    ): Result<ImportResult> = withContext(Dispatchers.IO) {
         runCatching {
-            val scannedFiles = safMediaScanner.scanFolder(Uri.parse(treeUriString))
-                .filter { scanned ->
-                    !mediaItemDao.existsInCategory(categoryId, scanned.contentUri.toString())
+            val allScannedFiles = safMediaScanner.scanFolder(Uri.parse(treeUriString))
+            val seenCanonicalIds = HashSet<String>()
+            var skippedDuplicates = 0
+            val filesToPersist = mutableListOf<ScannedMediaFile>()
+
+            for (file in allScannedFiles) {
+                if (!seenCanonicalIds.add(file.canonicalId) ||
+                    mediaItemDao.existsByCanonicalId(categoryId, file.canonicalId)
+                ) {
+                    skippedDuplicates++
+                } else {
+                    filesToPersist.add(file)
                 }
-            persistScannedMedia(categoryId, scannedFiles)
+            }
+
+            persistScannedMedia(
+                categoryId = categoryId,
+                scannedFiles = filesToPersist,
+                initialSkippedDuplicates = skippedDuplicates
+            )
         }
     }
 
@@ -82,22 +115,33 @@ class MediaRepositoryImpl @Inject constructor(
 
     private suspend fun persistScannedMedia(
         categoryId: Long,
-        scannedFiles: List<ScannedMediaFile>
-    ): Int {
-        if (scannedFiles.isEmpty()) return 0
+        scannedFiles: List<ScannedMediaFile>,
+        initialSkippedDuplicates: Int
+    ): ImportResult {
+        if (scannedFiles.isEmpty()) {
+            return ImportResult(
+                importedCount = 0,
+                skippedDuplicateCount = initialSkippedDuplicates
+            )
+        }
 
         val entitiesToInsert = mutableListOf<MediaItemEntity>()
         for (scanned in scannedFiles) {
-            val thumbnailPath = thumbnailStorageManager.generateAndSaveThumbnail(
-                contentUri = scanned.contentUri,
-                mediaType = scanned.mediaType
-            ) ?: continue
+            val thumbnailPath = if (scanned.mediaType == MediaType.DOCUMENT) {
+                ""
+            } else {
+                thumbnailStorageManager.generateAndSaveThumbnail(
+                    contentUri = scanned.contentUri,
+                    mediaType = scanned.mediaType
+                ) ?: continue
+            }
 
             entitiesToInsert.add(
                 MediaItemEntity(
                     categoryId = categoryId,
                     mediaType = scanned.mediaType.name,
                     contentUri = scanned.contentUri.toString(),
+                    canonicalId = scanned.canonicalId,
                     thumbnailPath = thumbnailPath,
                     displayName = scanned.displayName,
                     mimeType = scanned.mimeType,
@@ -108,8 +152,31 @@ class MediaRepositoryImpl @Inject constructor(
             )
         }
 
-        if (entitiesToInsert.isEmpty()) return 0
+        if (entitiesToInsert.isEmpty()) {
+            return ImportResult(
+                importedCount = 0,
+                skippedDuplicateCount = initialSkippedDuplicates
+            )
+        }
+
         val insertedRowIds = mediaItemDao.insertMediaItems(entitiesToInsert)
-        return insertedRowIds.count { it != -1L }
+        var importedCount = 0
+        var conflictSkipped = 0
+        insertedRowIds.forEachIndexed { index, rowId ->
+            if (rowId != -1L) {
+                importedCount++
+            } else {
+                conflictSkipped++
+                val orphanThumbnail = entitiesToInsert[index].thumbnailPath
+                if (orphanThumbnail.isNotBlank()) {
+                    thumbnailStorageManager.deleteThumbnail(orphanThumbnail)
+                }
+            }
+        }
+
+        return ImportResult(
+            importedCount = importedCount,
+            skippedDuplicateCount = initialSkippedDuplicates + conflictSkipped
+        )
     }
 }

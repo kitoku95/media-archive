@@ -45,12 +45,13 @@ class EntityMapperTest {
     }
 
     @Test
-    fun `MediaItemEntity maps IMAGE and VIDEO items accurately`() {
+    fun `MediaItemEntity maps IMAGE, VIDEO, and DOCUMENT items accurately`() {
         val imageEntity = MediaItemEntity(
             id = 10L,
             categoryId = 1L,
             mediaType = "IMAGE",
             contentUri = "content://media/10",
+            canonicalId = "provider::10",
             thumbnailPath = "/data/files/thumbnails/a.webp",
             displayName = "photo.jpg",
             mimeType = "image/jpeg",
@@ -63,12 +64,26 @@ class EntityMapperTest {
             categoryId = 1L,
             mediaType = "VIDEO",
             contentUri = "content://media/11",
+            canonicalId = "provider::11",
             thumbnailPath = "/data/files/thumbnails/b.webp",
             displayName = "clip.mp4",
             mimeType = "video/mp4",
             durationMs = 15_000L,
             sizeBytes = 102_400L,
             addedAt = 6000L
+        )
+        val documentEntity = MediaItemEntity(
+            id = 12L,
+            categoryId = 1L,
+            mediaType = "DOCUMENT",
+            contentUri = "content://media/12",
+            canonicalId = "provider::12",
+            thumbnailPath = "",
+            displayName = "report.pdf",
+            mimeType = "application/pdf",
+            durationMs = null,
+            sizeBytes = 50_000L,
+            addedAt = 7000L
         )
 
         val imageDomain = imageEntity.toDomain()
@@ -79,6 +94,10 @@ class EntityMapperTest {
         val videoDomain = videoEntity.toDomain()
         assertEquals(MediaType.VIDEO, videoDomain.mediaType)
         assertEquals(15_000L, videoDomain.durationMs)
-        assertEquals("clip.mp4", videoDomain.displayName)
+
+        val documentDomain = documentEntity.toDomain()
+        assertEquals(MediaType.DOCUMENT, documentDomain.mediaType)
+        assertEquals("", documentDomain.thumbnailPath)
+        assertEquals("report.pdf", documentDomain.displayName)
     }
 }

@@ -1,5 +1,6 @@
 package io.github.kitoku95.mediaarchive.domain.usecase.media
 
+import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.repository.MediaRepository
@@ -62,19 +63,21 @@ class MediaUseCasesTest {
         val result = importSelectedMediaUseCase(categoryId = 1L, uriStrings = emptyList())
 
         assertTrue(result.isSuccess)
-        assertEquals(0, result.getOrNull())
+        assertEquals(ImportResult(0, 0), result.getOrNull())
         coVerify(exactly = 0) { mediaRepository.importSelectedMedia(any(), any()) }
     }
 
     @Test
     fun `importSelectedMediaUseCase delegates non-empty uri list to repository`() = runTest {
         val uris = listOf("content://doc/1", "content://doc/2")
-        coEvery { mediaRepository.importSelectedMedia(1L, uris) } returns Result.success(2)
+        coEvery {
+            mediaRepository.importSelectedMedia(1L, uris)
+        } returns Result.success(ImportResult(2, 0))
 
         val result = importSelectedMediaUseCase(categoryId = 1L, uriStrings = uris)
 
         assertTrue(result.isSuccess)
-        assertEquals(2, result.getOrNull())
+        assertEquals(ImportResult(2, 0), result.getOrNull())
         coVerify(exactly = 1) { mediaRepository.importSelectedMedia(1L, uris) }
     }
 
@@ -83,19 +86,21 @@ class MediaUseCasesTest {
         val result = importFolderMediaUseCase(categoryId = 1L, treeUriString = "   ")
 
         assertTrue(result.isSuccess)
-        assertEquals(0, result.getOrNull())
+        assertEquals(ImportResult(0, 0), result.getOrNull())
         coVerify(exactly = 0) { mediaRepository.importFolderMedia(any(), any()) }
     }
 
     @Test
     fun `importFolderMediaUseCase delegates valid tree uri to repository`() = runTest {
         val treeUri = "content://com.android.externalstorage.documents/tree/primary%3APictures"
-        coEvery { mediaRepository.importFolderMedia(2L, treeUri) } returns Result.success(5)
+        coEvery {
+            mediaRepository.importFolderMedia(2L, treeUri)
+        } returns Result.success(ImportResult(5, 1))
 
         val result = importFolderMediaUseCase(categoryId = 2L, treeUriString = treeUri)
 
         assertTrue(result.isSuccess)
-        assertEquals(5, result.getOrNull())
+        assertEquals(ImportResult(5, 1), result.getOrNull())
         coVerify(exactly = 1) { mediaRepository.importFolderMedia(2L, treeUri) }
     }
 

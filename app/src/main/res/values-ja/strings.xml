@@ -35,19 +35,24 @@
     <!-- Category Detail & SAF Browser -->
     <string name="category_detail_tab_images">画像</string>
     <string name="category_detail_tab_videos">動画</string>
+    <string name="category_detail_tab_documents">ドキュメント</string>
     <string name="category_detail_btn_browse_storage">ストレージを参照</string>
-    <string name="category_detail_browse_sheet_title">カテゴリーにメディアを追加</string>
-    <string name="category_detail_browse_files">画像 / 動画を選択</string>
-    <string name="category_detail_browse_files_desc">ストレージから1つ以上の画像や動画を選択します</string>
+    <string name="category_detail_browse_sheet_title">カテゴリーにファイルを追加</string>
+    <string name="category_detail_browse_files">画像 / 動画 / ドキュメントを選択</string>
+    <string name="category_detail_browse_files_desc">ストレージから写真、動画、PDF、Office文書を選択します</string>
     <string name="category_detail_browse_folder">フォルダを選択</string>
-    <string name="category_detail_browse_folder_desc">選択したフォルダ内のすべての画像と動画を取り込みます</string>
+    <string name="category_detail_browse_folder_desc">選択したフォルダとサブフォルダ内のすべての写真・動画・文書を取り込みます</string>
     <string name="category_detail_empty_images">このカテゴリーにはまだ画像がありません。\n「ストレージを参照」をタップして追加してください。</string>
     <string name="category_detail_empty_videos">このカテゴリーにはまだ動画がありません。\n「ストレージを参照」をタップして追加してください。</string>
-    <string name="category_detail_importing">メディアを取り込み、サムネイルを生成しています…</string>
-    <string name="category_detail_import_success">%1$d 件のメディアを追加しました。</string>
-    <string name="category_detail_import_empty">新しいメディアは追加されませんでした。</string>
-    <string name="category_detail_import_error">選択したメディアを取り込めませんでした。もう一度お試しください。</string>
-    <string name="category_detail_viewer_coming_soon">全画面ビューアーは次のフェーズで実装されます。</string>
+    <string name="category_detail_empty_documents">このカテゴリーにはまだドキュメントがありません。\n「ストレージを参照」をタップしてPDFやOffice文書を追加してください。</string>
+    <string name="category_detail_importing">ファイルを取り込み、プレビューを準備しています…</string>
+    <string name="category_detail_import_success">%1$d 件の項目を追加しました。</string>
+    <string name="category_detail_import_with_duplicates">%1$d 件を追加しました（重複 %2$d 件をスキップ）。</string>
+    <string name="category_detail_import_all_duplicates">選択した %1$d 件はすべてこのカテゴリーに登録済みです。</string>
+    <string name="category_detail_import_empty">新しい項目は追加されませんでした。</string>
+    <string name="category_detail_import_error">選択した項目を取り込めませんでした。もう一度お試しください。</string>
+    <string name="document_open_no_app">このドキュメントを開けるアプリがインストールされていません。</string>
+    <string name="document_open_inaccessible">このドキュメントは端末ストレージ上でアクセスできなくなっています。</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">設定</string>

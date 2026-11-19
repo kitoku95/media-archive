@@ -14,11 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PhotoLibrary
@@ -54,10 +57,30 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.kitoku95.mediaarchive.R
 import io.github.kitoku95.mediaarchive.core.security.PrivateScreenProtectionEffect
+import io.github.kitoku95.mediaarchive.data.storage.DocumentOpenOutcome
+import io.github.kitoku95.mediaarchive.data.storage.ExternalDocumentOpener
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.feature.categorydetail.component.BrowseStorageBottomSheet
+import io.github.kitoku95.mediaarchive.feature.categorydetail.component.DocumentListItem
 import io.github.kitoku95.mediaarchive.feature.categorydetail.component.MediaSquareGridItem
+
+private val SUPPORTED_DOCUMENT_PICKER_MIMES = arrayOf(
+    "image/*",
+    "video/*",
+    "text/*",
+    "application/pdf",
+    "application/rtf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.oasis.opendocument.text",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.oasis.opendocument.spreadsheet",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/vnd.oasis.opendocument.presentation"
+)
 
 /**
  * Stateful route connecting [CategoryDetailViewModel], SAF file/folder pickers, and navigation.
@@ -72,6 +95,7 @@ fun CategoryDetailRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val documentOpener = remember { ExternalDocumentOpener() }
 
     PrivateScreenProtectionEffect(isPrivate = uiState.isPrivate)
 
@@ -98,21 +122,67 @@ fun CategoryDetailRoute(
             when (effect) {
                 CategoryDetailUiEffect.NavigateBack -> onNavigateBack()
                 CategoryDetailUiEffect.LaunchFilePicker -> {
-                    openMultipleDocumentsLauncher.launch(arrayOf("image/*", "video/*"))
+                    openMultipleDocumentsLauncher.launch(SUPPORTED_DOCUMENT_PICKER_MIMES)
                 }
                 CategoryDetailUiEffect.LaunchFolderPicker -> {
                     openDocumentTreeLauncher.launch(null)
                 }
                 is CategoryDetailUiEffect.NavigateToImageViewer -> {
-                    onNavigateToImageViewer(effect.categoryId, effect.initialIndex, effect.isPrivate)
+                    onNavigateToImageViewer(
+                        effect.categoryId,
+                        effect.initialIndex,
+                        effect.isPrivate
+                    )
                 }
                 is CategoryDetailUiEffect.NavigateToVideoPlayer -> {
-                    onNavigateToVideoPlayer(effect.categoryId, effect.initialIndex, effect.isPrivate)
-                }
-                is CategoryDetailUiEffect.ShowImportSuccess -> {
-                    snackbarHostState.showSnackbar(
-                        context.getString(R.string.category_detail_import_success, effect.importedCount)
+                    onNavigateToVideoPlayer(
+                        effect.categoryId,
+                        effect.initialIndex,
+                        effect.isPrivate
                     )
+                }
+                is CategoryDetailUiEffect.OpenDocumentExternally -> {
+                    when (
+                        documentOpener.openDocument(
+                            context = context,
+                            contentUri = effect.contentUri,
+                            mimeType = effect.mimeType,
+                            displayName = effect.displayName
+                        )
+                    ) {
+                        DocumentOpenOutcome.Opened -> Unit
+                        DocumentOpenOutcome.NoAppFound -> {
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.document_open_no_app)
+                            )
+                        }
+                        DocumentOpenOutcome.FileInaccessible -> {
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.document_open_inaccessible)
+                            )
+                        }
+                    }
+                }
+                is CategoryDetailUiEffect.ShowImportResult -> {
+                    val message = when {
+                        effect.importedCount > 0 && effect.skippedDuplicateCount > 0 ->
+                            context.getString(
+                                R.string.category_detail_import_with_duplicates,
+                                effect.importedCount,
+                                effect.skippedDuplicateCount
+                            )
+                        effect.importedCount > 0 ->
+                            context.getString(
+                                R.string.category_detail_import_success,
+                                effect.importedCount
+                            )
+                        else ->
+                            context.getString(
+                                R.string.category_detail_import_all_duplicates,
+                                effect.skippedDuplicateCount
+                            )
+                    }
+                    snackbarHostState.showSnackbar(message)
                 }
                 CategoryDetailUiEffect.ShowImportEmpty -> {
                     snackbarHostState.showSnackbar(
@@ -156,6 +226,12 @@ fun CategoryDetailScreen(
     val activeItems = when (uiState.selectedTab) {
         MediaType.IMAGE -> uiState.images
         MediaType.VIDEO -> uiState.videos
+        MediaType.DOCUMENT -> uiState.documents
+    }
+    val selectedTabIndex = when (uiState.selectedTab) {
+        MediaType.IMAGE -> 0
+        MediaType.VIDEO -> 1
+        MediaType.DOCUMENT -> 2
     }
 
     Scaffold(
@@ -213,9 +289,7 @@ fun CategoryDetailScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            PrimaryTabRow(
-                selectedTabIndex = if (uiState.selectedTab == MediaType.IMAGE) 0 else 1
-            ) {
+            PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
                 Tab(
                     selected = uiState.selectedTab == MediaType.IMAGE,
                     onClick = { onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.IMAGE)) },
@@ -233,6 +307,17 @@ fun CategoryDetailScreen(
                     text = {
                         Text(
                             text = "${stringResource(R.string.category_detail_tab_videos)} (${uiState.videos.size})",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                )
+                Tab(
+                    selected = uiState.selectedTab == MediaType.DOCUMENT,
+                    onClick = { onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.DOCUMENT)) },
+                    text = {
+                        Text(
+                            text = "${stringResource(R.string.category_detail_tab_documents)} (${uiState.documents.size})",
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -264,6 +349,18 @@ fun CategoryDetailScreen(
                     EmptyMediaTabState(selectedTab = uiState.selectedTab)
                 }
 
+                uiState.selectedTab == MediaType.DOCUMENT -> {
+                    DocumentList(
+                        items = activeItems,
+                        onDocumentClick = { item ->
+                            onEvent(CategoryDetailUiEvent.OnDocumentClicked(item))
+                        },
+                        onDocumentLongClick = { item ->
+                            onEvent(CategoryDetailUiEvent.OnDeleteMediaClicked(item))
+                        }
+                    )
+                }
+
                 else -> {
                     MediaSquareGrid(
                         items = activeItems,
@@ -276,6 +373,7 @@ fun CategoryDetailScreen(
                                 MediaType.VIDEO -> onEvent(
                                     CategoryDetailUiEvent.OnVideoClicked(item.id, index)
                                 )
+                                MediaType.DOCUMENT -> Unit
                             }
                         },
                         onItemLongClick = { item ->
@@ -355,6 +453,36 @@ private fun MediaSquareGrid(
 }
 
 @Composable
+private fun DocumentList(
+    items: List<MediaItem>,
+    onDocumentClick: (MediaItem) -> Unit,
+    onDocumentLongClick: (MediaItem) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 12.dp,
+            bottom = 88.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = items,
+            key = { item -> item.id },
+            contentType = { "document_list_item" }
+        ) { item ->
+            DocumentListItem(
+                item = item,
+                onClick = { onDocumentClick(item) },
+                onLongClick = { onDocumentLongClick(item) }
+            )
+        }
+    }
+}
+
+@Composable
 private fun EmptyMediaTabState(selectedTab: MediaType) {
     Box(
         modifier = Modifier
@@ -367,10 +495,10 @@ private fun EmptyMediaTabState(selectedTab: MediaType) {
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                imageVector = if (selectedTab == MediaType.IMAGE) {
-                    Icons.Outlined.PhotoLibrary
-                } else {
-                    Icons.Outlined.VideoLibrary
+                imageVector = when (selectedTab) {
+                    MediaType.IMAGE -> Icons.Outlined.PhotoLibrary
+                    MediaType.VIDEO -> Icons.Outlined.VideoLibrary
+                    MediaType.DOCUMENT -> Icons.Outlined.Description
                 },
                 contentDescription = null,
                 modifier = Modifier.size(56.dp),
@@ -379,10 +507,10 @@ private fun EmptyMediaTabState(selectedTab: MediaType) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(
-                    if (selectedTab == MediaType.IMAGE) {
-                        R.string.category_detail_empty_images
-                    } else {
-                        R.string.category_detail_empty_videos
+                    when (selectedTab) {
+                        MediaType.IMAGE -> R.string.category_detail_empty_images
+                        MediaType.VIDEO -> R.string.category_detail_empty_videos
+                        MediaType.DOCUMENT -> R.string.category_detail_empty_documents
                     }
                 ),
                 style = MaterialTheme.typography.bodyMedium,

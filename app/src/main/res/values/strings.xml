@@ -35,19 +35,24 @@
     <!-- Category Detail & SAF Browser -->
     <string name="category_detail_tab_images">Images</string>
     <string name="category_detail_tab_videos">Videos</string>
+    <string name="category_detail_tab_documents">Documents</string>
     <string name="category_detail_btn_browse_storage">Browse Storage</string>
-    <string name="category_detail_browse_sheet_title">Add Media to Category</string>
-    <string name="category_detail_browse_files">Select Images / Videos</string>
-    <string name="category_detail_browse_files_desc">Pick one or more photos and videos from storage</string>
+    <string name="category_detail_browse_sheet_title">Add Files to Category</string>
+    <string name="category_detail_browse_files">Select Media / Documents</string>
+    <string name="category_detail_browse_files_desc">Pick photos, videos, PDFs, or office documents from storage</string>
     <string name="category_detail_browse_folder">Select Folder</string>
-    <string name="category_detail_browse_folder_desc">Import all photos and videos inside a chosen folder</string>
-    <string name="category_detail_empty_images">No images in this category yet.\nTap Browse Storage to add photos.</string>
-    <string name="category_detail_empty_videos">No videos in this category yet.\nTap Browse Storage to add videos.</string>
-    <string name="category_detail_importing">Importing media &amp; generating thumbnails…</string>
-    <string name="category_detail_import_success">Added %1$d media item(s).</string>
-    <string name="category_detail_import_empty">No new media items were added.</string>
-    <string name="category_detail_import_error">Could not import selected media. Please try again.</string>
-    <string name="category_detail_viewer_coming_soon">Full-screen viewer will be available in the next phase.</string>
+    <string name="category_detail_browse_folder_desc">Import all photos, videos, and documents inside a chosen folder and its subfolders</string>
+    <string name="category_detail_empty_images">No images in this category yet.\nTap Browse Storage to add photos or a folder.</string>
+    <string name="category_detail_empty_videos">No videos in this category yet.\nTap Browse Storage to add videos or a folder.</string>
+    <string name="category_detail_empty_documents">No documents in this category yet.\nTap Browse Storage to add PDF, text, or office files.</string>
+    <string name="category_detail_importing">Importing files &amp; preparing previews…</string>
+    <string name="category_detail_import_success">Added %1$d item(s).</string>
+    <string name="category_detail_import_with_duplicates">Added %1$d item(s) (%2$d duplicate(s) skipped).</string>
+    <string name="category_detail_import_all_duplicates">All %1$d selected item(s) are already in this category.</string>
+    <string name="category_detail_import_empty">No new items were added.</string>
+    <string name="category_detail_import_error">Could not import selected items. Please try again.</string>
+    <string name="document_open_no_app">No installed app can open this document.</string>
+    <string name="document_open_inaccessible">This document is no longer accessible on device storage.</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>

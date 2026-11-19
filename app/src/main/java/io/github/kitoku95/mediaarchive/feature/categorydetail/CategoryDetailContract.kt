@@ -15,6 +15,7 @@ data class CategoryDetailUiState(
     val selectedTab: MediaType = MediaType.IMAGE,
     val images: List<MediaItem> = emptyList(),
     val videos: List<MediaItem> = emptyList(),
+    val documents: List<MediaItem> = emptyList(),
     val isLoading: Boolean = true,
     val isImporting: Boolean = false,
     val isBrowseSheetVisible: Boolean = false,
@@ -35,6 +36,7 @@ sealed interface CategoryDetailUiEvent {
     data class OnFolderSelected(val treeUri: String) : CategoryDetailUiEvent
     data class OnImageClicked(val mediaId: Long, val index: Int) : CategoryDetailUiEvent
     data class OnVideoClicked(val mediaId: Long, val index: Int) : CategoryDetailUiEvent
+    data class OnDocumentClicked(val mediaItem: MediaItem) : CategoryDetailUiEvent
     data class OnDeleteMediaClicked(val mediaItem: MediaItem) : CategoryDetailUiEvent
     data object OnDismissDeleteMediaDialog : CategoryDetailUiEvent
     data object OnConfirmDeleteMedia : CategoryDetailUiEvent
@@ -52,12 +54,24 @@ sealed interface CategoryDetailUiEffect {
         val initialIndex: Int,
         val isPrivate: Boolean = false
     ) : CategoryDetailUiEffect
+
     data class NavigateToVideoPlayer(
         val categoryId: Long,
         val initialIndex: Int,
         val isPrivate: Boolean = false
     ) : CategoryDetailUiEffect
-    data class ShowImportSuccess(val importedCount: Int) : CategoryDetailUiEffect
+
+    data class OpenDocumentExternally(
+        val contentUri: String,
+        val mimeType: String,
+        val displayName: String
+    ) : CategoryDetailUiEffect
+
+    data class ShowImportResult(
+        val importedCount: Int,
+        val skippedDuplicateCount: Int
+    ) : CategoryDetailUiEffect
+
     data object ShowImportEmpty : CategoryDetailUiEffect
     data object ShowImportError : CategoryDetailUiEffect
     data class ShowDeleteMediaSuccess(val displayName: String) : CategoryDetailUiEffect

@@ -1,6 +1,6 @@
-# Project Implementation Roadmap (7 Phases)
+# Project Implementation Roadmap (8 Phases)
 
-This document breaks down the development of **MediaArchive** into **7 sequential, self-contained Phases**, complete with **dedicated Git branch names** and clear acceptance criteria for each coding session.
+This document breaks down the development of **MediaArchive** into **8 sequential, self-contained Phases**, complete with **dedicated Git branch names** and clear acceptance criteria for each coding session.
 
 ---
 
@@ -8,7 +8,7 @@ This document breaks down the development of **MediaArchive** into **7 sequentia
 
 | Phase | Core Focus | Git Branch Name | Target Tag |
 | :--- | :--- | :--- | :--- |
-| **Phase 0 (Current)** | Hard Rules, Architecture, ADRs, Design System, Naming Standards & Roadmap | `docs/phase-0-architecture-and-roadmap` | `v0.0.1-docs` |
+| **Phase 0** | Hard Rules, Architecture, ADRs, Design System, Naming Standards & Roadmap | `docs/phase-0-architecture-and-roadmap` | `v0.0.1-docs` |
 | **Phase 1** | Project Setup, Multi-Theme Palettes (Neutral + Deep Tones), 3 Languages (`en`/`vi`/`ja`), `Settings` & Concise `About` Screen | `feat/phase-1-project-setup` | `v0.1.0-phase1` |
 | **Phase 2** | SQLite Database (Room), Default `Main` (`public`) Seed, Password Hasher & Thumbnail Engine | `feat/phase-2-database-and-thumbnail` | `v0.2.0-phase2` |
 | **Phase 3** | Category Management (`public`/`private`) & Unrestricted Password Authentication Gate | `feat/phase-3-category-and-auth` | `v0.3.0-phase3` |
@@ -16,6 +16,7 @@ This document breaks down the development of **MediaArchive** into **7 sequentia
 | **Phase 5** | Full-Screen Image Viewer (`HorizontalPager` Swipe) & Video Player (`Media3 ExoPlayer` with Previous/Next Buttons) | `feat/phase-5-image-pager-and-video-player` | `v0.5.0-phase5` |
 | **Phase 6** | Missing File Handling, Media/Category Deletion, Grid Optimization & Automated Unit/UI Tests | `feat/phase-6-polish-and-testing` | `v0.6.0-phase6` |
 | **Phase 7** | Source Code Security Audit & Local Storage Hardening (`FLAG_SECURE`, Crypto, SAF Safety, Manifest/R8) | `sec/phase-7-source-security-hardening` | `v1.0.0` |
+| **Phase 8** | Office Documents Tab, Explorer-Style Nested Folders, `CategoryCard` Uniform Height & Canonical SAF Deduplication | `feat/phase-8-documents-explorer-and-polish` | `v1.1.0` |
 
 ---
 
@@ -30,7 +31,8 @@ flowchart TD
     P4["Phase 4: Category Detail (2 Square Grid Tabs) & SAF Storage Browser\nBranch: feat/phase-4-media-grid-and-saf-browser"] --> P5
     P5["Phase 5: Full-Screen Swipe Image Viewer & Media3 Video Player\nBranch: feat/phase-5-image-pager-and-video-player"] --> P6
     P6["Phase 6: Edge Cases, Cleanup & Automated Testing\nBranch: feat/phase-6-polish-and-testing"] --> P7
-    P7["Phase 7: Source Code Security Audit & Hardening\nBranch: sec/phase-7-source-security-hardening"]
+    P7["Phase 7: Source Code Security Audit & Hardening\nBranch: sec/phase-7-source-security-hardening"] --> P8
+    P8["Phase 8: Documents Tab, Folder Explorer, UI Uniformity & Canonical Dedup\nBranch: feat/phase-8-documents-explorer-and-polish"]
 ```
 
 ---
@@ -219,3 +221,57 @@ Conduct a comprehensive security audit of the source code and local storage hand
 ### Definition of Done (DoD):
 - 100% of items in the Security Audit Checklist are verified and passed.
 - Opening a `private` Category activates `FLAG_SECURE` in the Recent Apps switcher, and SQLite inspection reveals only salted hashes.
+
+
+---
+
+## Phase 8: Office Documents Tab, Explorer-Style Nested Folders, `CategoryCard` Uniform Height & Canonical SAF Deduplication
+
+- **Git Branch**: `feat/phase-8-documents-explorer-and-polish`
+- **Branch Command**: `git checkout -b feat/phase-8-documents-explorer-and-polish dev`
+- **Suggested Commit**: `feat(documents): add documents tab, explorer nested folders, canonical saf deduplication and uniform category card height`
+- **Reference ADR**: [ADR-006](../decisions/ADR-006-documents-folder-explorer-and-deduplication.md)
+
+### Goal:
+Extend **MediaArchive** with Office/Text/PDF document support (opened via installed external Android apps), Explorer-style nested folder browsing when importing folders via SAF, a dedicated 3rd **Documents** tab with uniform-height rows and extension badges, uniform `CategoryCard` height on `CategoryListScreen`, and canonical SAF deduplication.
+
+### Tasks:
+1. **Domain Layer Updates**:
+   - Add `DOCUMENT` to `MediaType` (`IMAGE`, `VIDEO`, `DOCUMENT`).
+   - Add `ArchiveFolder` domain model (`id`, `categoryId`, `parentFolderId`, `name`, `treeUri`, `addedAt`).
+   - Add `folderId: Long?` to `MediaItem` and introduce `ImportResult(val importedCount: Int, val skippedDuplicateCount: Int)`.
+   - Add `ArchiveFolderRepository` (or extend `MediaRepository`) and UseCases: `GetChildFoldersUseCase`, `DeleteArchiveFolderUseCase`, and update `GetMediaByCategoryUseCase` / `ImportSelectedMediaUseCase` / `ImportFolderMediaUseCase` to accept `folderId: Long?` and return `Result<ImportResult>`.
+2. **Room Database v2 & `MIGRATION_1_2`**:
+   - Add `ArchiveFolderEntity` and `ArchiveFolderDao` (including recursive CTE `getDescendantThumbnailPaths`).
+   - Update `MediaItemEntity` with `folder_id` (nullable FK to `archive_folders` `ON DELETE CASCADE`) and `canonical_id` (`UNIQUE(category_id, canonical_id)`).
+   - Bump `MediaArchiveDatabase` to `version = 2`, implement `MIGRATION_1_2`, and register `.addMigrations(MediaArchiveDatabase.MIGRATION_1_2)` in `DatabaseModule`.
+3. **SAF Scanner, Canonical Deduplication & External Document Opener**:
+   - Implement `SafCanonicalIdResolver` (`authority::documentId` for document/tree URIs, fallback to normalized URI).
+   - Update `SafMediaScanner` to classify `DOCUMENT` files by MIME type + lowercase extension fallback, and return a recursive `ScannedFolderNode` tree instead of flattening folders.
+   - Update `MediaRepositoryImpl` to:
+     - Deduplicate in-batch and against `existsByCanonicalId(categoryId, canonicalId)`.
+     - Skip `.webp` thumbnail generation for `MediaType.DOCUMENT` (`thumbnailPath = ""`).
+     - Delete newly created orphan thumbnails whenever `insertMediaItems` returns `-1L`.
+     - Create the selected folder as an `ArchiveFolder` at `currentFolderId` and recursively persist child folders and files.
+     - Collect and delete descendant thumbnails when deleting an `ArchiveFolder`.
+   - Implement `ExternalDocumentOpener` using `Intent(Intent.ACTION_VIEW)` + `FLAG_GRANT_READ_URI_PERMISSION` + `Intent.createChooser(...)`, handling `ActivityNotFoundException` and `SecurityException`.
+4. **Category Detail Explorer UI & 3rd Tab ("Documents")**:
+   - Update `CategoryDetailViewModel` / `CategoryDetailContract` to track `folderStack: List<ArchiveFolder>`, observe `childFolders` + `images` + `videos` + `documents` for `(categoryId, currentFolderId)`, and emit `OpenDocumentExternally` / `ShowNoAppForDocument` / `ImportResult` effects.
+   - Update `CategoryDetailScreen`:
+     - Expand `OpenMultipleDocuments` MIME array to include images, videos, text, PDF, Word, Excel, PowerPoint, and OpenDocument types.
+     - Add 3rd tab (**Documents**) in `PrimaryTabRow`.
+     - Add breadcrumb bar when `folderStack.isNotEmpty()` and intercept system/TopAppBar Back (`BackHandler`) to step up one folder level.
+     - Add `FolderSquareGridItem` (for Images/Videos tabs), `FolderListItem` (`72.dp` fixed height), and `DocumentListItem` (`72.dp` fixed height, `44.dp` color-coded extension badge, single-line `TextOverflow.Ellipsis` filename, `EXT • size` subtitle).
+   - Pass optional `folderId: Long?` to `AppDestination.ImageViewer` and `AppDestination.VideoPlayer` so viewer navigation scopes to the current folder.
+5. **Category List Uniform Height Fix**:
+   - Update `CategoryCard.kt` inner `Row` to `Modifier.fillMaxWidth().height(72.dp).padding(horizontal = 16.dp)` with `Alignment.CenterVertically` so `Main` and all custom `Public`/`Private` cards render at identical height.
+6. **Localization (`en`, `vi`, `ja`) & Automated Tests**:
+   - Add all new string resources (Documents tab, empty states, breadcrumb root, duplicate skip feedback, no-app-to-open-document error, folder delete dialog, updated Browse Storage labels) to `res/values/strings.xml`, `res/values-vi/strings.xml`, and `res/values-ja/strings.xml`.
+   - Add unit tests for `SafCanonicalIdResolver`, `MediaRepositoryImpl` (deduplication, orphan thumbnail cleanup, recursive folder persistence & deletion), `CategoryDetailViewModel` (3 tabs + folder navigation stack), and `MIGRATION_1_2`.
+
+### Definition of Done (DoD):
+- `CategoryCard` height is uniform (`72.dp`) across `Main` and all custom `Public`/`Private` Categories.
+- Selecting individual files or folders supports Images, Videos, Text, PDF, Word, Excel, and PowerPoint files, routing Documents to the 3rd **Documents** tab.
+- Documents list rows have identical height (`72.dp`), distinct extension badges, single-line `...` truncation, and open in installed external apps via `ACTION_VIEW` (with graceful Snackbar fallback when no app is available).
+- Importing a folder creates a browsable folder card at the current level and preserves nested subfolders/files recursively with Explorer-style navigation and Back/breadcrumb support.
+- Selecting the same file via individual picker and folder picker never creates duplicates in the same Category, and `./gradlew testDebugUnitTest` passes 100%.

@@ -7,12 +7,15 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
- * Observes media items of a specific [MediaType] belonging to a category.
+ * Observes media or document items of a specific [MediaType] belonging to a category.
  */
 class GetMediaByCategoryUseCase @Inject constructor(
     private val mediaRepository: MediaRepository
 ) {
-    operator fun invoke(categoryId: Long, mediaType: MediaType): Flow<List<MediaItem>> {
+    operator fun invoke(
+        categoryId: Long,
+        mediaType: MediaType
+    ): Flow<List<MediaItem>> {
         return mediaRepository.observeMediaByCategoryAndType(
             categoryId = categoryId,
             mediaType = mediaType

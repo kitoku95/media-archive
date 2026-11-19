@@ -108,6 +108,7 @@ class ThumbnailStorageManager @Inject constructor(
         return when (mediaType) {
             MediaType.IMAGE -> extractImageBitmapFallback(contentUri)
             MediaType.VIDEO -> extractVideoBitmapFallback(contentUri)
+            MediaType.DOCUMENT -> null
         }
     }
 

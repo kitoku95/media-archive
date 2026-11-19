@@ -2,6 +2,7 @@ package io.github.kitoku95.mediaarchive.feature.videoplayer
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.repository.MediaRepository
@@ -12,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -174,12 +176,12 @@ class VideoPlayerViewModelTest {
         override suspend fun importSelectedMedia(
             categoryId: Long,
             uriStrings: List<String>
-        ): Result<Int> = Result.success(0)
+        ): Result<ImportResult> = Result.success(ImportResult(0, 0))
 
         override suspend fun importFolderMedia(
             categoryId: Long,
             treeUriString: String
-        ): Result<Int> = Result.success(0)
+        ): Result<ImportResult> = Result.success(ImportResult(0, 0))
 
         override suspend fun deleteMediaItem(mediaItemId: Long): Result<Unit> {
             deletedIds.add(mediaItemId)

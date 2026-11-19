@@ -2,6 +2,7 @@ package io.github.kitoku95.mediaarchive.feature.categorydetail
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.domain.repository.MediaRepository
@@ -60,10 +61,25 @@ class CategoryDetailViewModelTest {
         addedAt = 200L
     )
 
+    private val sampleDocument = MediaItem(
+        id = 3L,
+        categoryId = 10L,
+        mediaType = MediaType.DOCUMENT,
+        contentUri = "content://media/doc/3",
+        thumbnailPath = "",
+        displayName = "itinerary.pdf",
+        mimeType = "application/pdf",
+        durationMs = null,
+        sizeBytes = 32_768L,
+        addedAt = 300L
+    )
+
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        fakeRepository = FakeMediaRepository(initialItems = listOf(sampleImage, sampleVideo))
+        fakeRepository = FakeMediaRepository(
+            initialItems = listOf(sampleImage, sampleVideo, sampleDocument)
+        )
         val savedStateHandle = SavedStateHandle(
             mapOf(
                 "categoryId" to 10L,
@@ -86,7 +102,7 @@ class CategoryDetailViewModelTest {
     }
 
     @Test
-    fun `uiState loads separated images and videos for category`() = runTest {
+    fun `uiState loads separated images, videos, and documents directly for category`() = runTest {
         viewModel.uiState.test {
             assertTrue(awaitItem().isLoading)
             val loaded = awaitItem()
@@ -97,49 +113,38 @@ class CategoryDetailViewModelTest {
             assertEquals(MediaType.IMAGE, loaded.selectedTab)
             assertEquals(listOf(sampleImage), loaded.images)
             assertEquals(listOf(sampleVideo), loaded.videos)
+            assertEquals(listOf(sampleDocument), loaded.documents)
         }
     }
 
     @Test
-    fun `selecting video tab updates selectedTab`() = runTest {
+    fun `selecting document tab updates selectedTab`() = runTest {
         viewModel.uiState.test {
             awaitItem()
             awaitItem()
 
-            viewModel.onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.VIDEO))
-            val updated = awaitItem()
-            assertEquals(MediaType.VIDEO, updated.selectedTab)
+            viewModel.onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.DOCUMENT))
+            assertEquals(MediaType.DOCUMENT, awaitItem().selectedTab)
         }
     }
 
     @Test
-    fun `browse storage sheet opens and launches file or folder picker`() = runTest {
-        viewModel.uiState.test {
-            awaitItem()
-            awaitItem()
-
-            viewModel.onEvent(CategoryDetailUiEvent.OnBrowseStorageClicked)
-            assertTrue(awaitItem().isBrowseSheetVisible)
-
-            viewModel.uiEffect.test {
-                viewModel.onEvent(CategoryDetailUiEvent.OnSelectFilesClicked)
-                assertEquals(CategoryDetailUiEffect.LaunchFilePicker, awaitItem())
-            }
-            assertFalse(awaitItem().isBrowseSheetVisible)
-
-            viewModel.onEvent(CategoryDetailUiEvent.OnBrowseStorageClicked)
-            assertTrue(awaitItem().isBrowseSheetVisible)
-
-            viewModel.uiEffect.test {
-                viewModel.onEvent(CategoryDetailUiEvent.OnSelectFolderClicked)
-                assertEquals(CategoryDetailUiEffect.LaunchFolderPicker, awaitItem())
-            }
-            assertFalse(awaitItem().isBrowseSheetVisible)
+    fun `tapping document emits OpenDocumentExternally effect`() = runTest {
+        viewModel.uiEffect.test {
+            viewModel.onEvent(CategoryDetailUiEvent.OnDocumentClicked(sampleDocument))
+            assertEquals(
+                CategoryDetailUiEffect.OpenDocumentExternally(
+                    contentUri = sampleDocument.contentUri,
+                    mimeType = sampleDocument.mimeType,
+                    displayName = sampleDocument.displayName
+                ),
+                awaitItem()
+            )
         }
     }
 
     @Test
-    fun `importing selected files emits success effect and updates grid reactively`() = runTest {
+    fun `importing selected files emits ShowImportResult and updates grid reactively`() = runTest {
         viewModel.uiState.test {
             awaitItem()
             awaitItem()
@@ -149,7 +154,10 @@ class CategoryDetailViewModelTest {
                     CategoryDetailUiEvent.OnMediaFilesSelected(listOf("content://media/image/3"))
                 )
                 advanceUntilIdle()
-                assertEquals(CategoryDetailUiEffect.ShowImportSuccess(1), awaitItem())
+                assertEquals(
+                    CategoryDetailUiEffect.ShowImportResult(importedCount = 1, skippedDuplicateCount = 0),
+                    awaitItem()
+                )
             }
 
             cancelAndIgnoreRemainingEvents()
@@ -209,65 +217,6 @@ class CategoryDetailViewModelTest {
         assertEquals("1:01:01", formatDuration(3_661_000L))
     }
 
-    private class FakeMediaRepository(
-        initialItems: List<MediaItem> = emptyList()
-    ) : MediaRepository {
-        private val itemsFlow = MutableStateFlow(initialItems)
-        private var nextId = 100L
-        var shouldFailImport = false
-
-        override fun observeMediaByCategoryAndType(
-            categoryId: Long,
-            mediaType: MediaType
-        ): Flow<List<MediaItem>> {
-            return itemsFlow.map { items ->
-                items.filter { it.categoryId == categoryId && it.mediaType == mediaType }
-            }
-        }
-
-        override suspend fun importSelectedMedia(
-            categoryId: Long,
-            uriStrings: List<String>
-        ): Result<Int> {
-            if (shouldFailImport) {
-                return Result.failure(IllegalStateException("Simulated SAF error"))
-            }
-            val newItems = uriStrings.map { uri ->
-                MediaItem(
-                    id = nextId++,
-                    categoryId = categoryId,
-                    mediaType = MediaType.IMAGE,
-                    contentUri = uri,
-                    thumbnailPath = "/tmp/thumb_$nextId.webp",
-                    displayName = "imported_$nextId.jpg",
-                    mimeType = "image/jpeg",
-                    durationMs = null,
-                    sizeBytes = 1024L,
-                    addedAt = System.currentTimeMillis()
-                )
-            }
-            itemsFlow.value = itemsFlow.value + newItems
-            return Result.success(newItems.size)
-        }
-
-        override suspend fun importFolderMedia(
-            categoryId: Long,
-            treeUriString: String
-        ): Result<Int> {
-            if (shouldFailImport) {
-                return Result.failure(IllegalStateException("Simulated folder error"))
-            }
-            return Result.success(0)
-        }
-
-        override suspend fun deleteMediaItem(mediaItemId: Long): Result<Unit> {
-            itemsFlow.value = itemsFlow.value.filterNot { it.id == mediaItemId }
-            return Result.success(Unit)
-        }
-
-        override suspend fun isMediaAccessible(contentUri: String): Boolean = true
-    }
-
     @Test
     fun `confirming delete media item removes it from grid and emits success effect`() = runTest {
         viewModel.uiState.test {
@@ -292,5 +241,64 @@ class CategoryDetailViewModelTest {
                 awaitItem()
             )
         }
+    }
+
+    private class FakeMediaRepository(
+        initialItems: List<MediaItem> = emptyList()
+    ) : MediaRepository {
+        private val itemsFlow = MutableStateFlow(initialItems)
+        private var nextId = 100L
+        var shouldFailImport = false
+
+        override fun observeMediaByCategoryAndType(
+            categoryId: Long,
+            mediaType: MediaType
+        ): Flow<List<MediaItem>> {
+            return itemsFlow.map { items ->
+                items.filter { it.categoryId == categoryId && it.mediaType == mediaType }
+            }
+        }
+
+        override suspend fun importSelectedMedia(
+            categoryId: Long,
+            uriStrings: List<String>
+        ): Result<ImportResult> {
+            if (shouldFailImport) {
+                return Result.failure(IllegalStateException("Simulated SAF error"))
+            }
+            val newItems = uriStrings.map { uri ->
+                MediaItem(
+                    id = nextId++,
+                    categoryId = categoryId,
+                    mediaType = MediaType.IMAGE,
+                    contentUri = uri,
+                    thumbnailPath = "/tmp/thumb_$nextId.webp",
+                    displayName = "imported_$nextId.jpg",
+                    mimeType = "image/jpeg",
+                    durationMs = null,
+                    sizeBytes = 1024L,
+                    addedAt = System.currentTimeMillis()
+                )
+            }
+            itemsFlow.value = itemsFlow.value + newItems
+            return Result.success(ImportResult(importedCount = newItems.size, skippedDuplicateCount = 0))
+        }
+
+        override suspend fun importFolderMedia(
+            categoryId: Long,
+            treeUriString: String
+        ): Result<ImportResult> {
+            if (shouldFailImport) {
+                return Result.failure(IllegalStateException("Simulated folder error"))
+            }
+            return Result.success(ImportResult(0, 0))
+        }
+
+        override suspend fun deleteMediaItem(mediaItemId: Long): Result<Unit> {
+            itemsFlow.value = itemsFlow.value.filterNot { it.id == mediaItemId }
+            return Result.success(Unit)
+        }
+
+        override suspend fun isMediaAccessible(contentUri: String): Boolean = true
     }
 }

@@ -3,9 +3,11 @@ package io.github.kitoku95.mediaarchive.data.repository
 import android.net.Uri
 import io.github.kitoku95.mediaarchive.data.local.dao.MediaItemDao
 import io.github.kitoku95.mediaarchive.data.local.entity.MediaItemEntity
+import io.github.kitoku95.mediaarchive.data.storage.SafCanonicalIdResolver
 import io.github.kitoku95.mediaarchive.data.storage.SafMediaScanner
 import io.github.kitoku95.mediaarchive.data.storage.ScannedMediaFile
 import io.github.kitoku95.mediaarchive.data.storage.ThumbnailStorageManager
+import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -24,11 +26,13 @@ class MediaRepositoryImplTest {
 
     private val mediaItemDao: MediaItemDao = mockk(relaxed = true)
     private val safMediaScanner: SafMediaScanner = mockk(relaxed = true)
+    private val canonicalIdResolver: SafCanonicalIdResolver = mockk(relaxed = true)
     private val thumbnailStorageManager: ThumbnailStorageManager = mockk(relaxed = true)
 
     private val repository = MediaRepositoryImpl(
         mediaItemDao = mediaItemDao,
         safMediaScanner = safMediaScanner,
+        canonicalIdResolver = canonicalIdResolver,
         thumbnailStorageManager = thumbnailStorageManager
     )
 
@@ -43,40 +47,118 @@ class MediaRepositoryImplTest {
     }
 
     @Test
-    fun `importSelectedMedia skips existing URIs and saves new thumbnails to SQLite`() = runTest {
-        val existingUri = "content://media/1"
-        val newUriString = "content://media/2"
-        val newUri: Uri = mockk {
-            every { this@mockk.toString() } returns newUriString
-        }
-        every { Uri.parse(newUriString) } returns newUri
+    fun `importSelectedMedia deduplicates by canonicalId and skips thumbnail for DOCUMENT`() = runTest {
+        val existingUriStr = "content://media/1"
+        val newDocUriStr = "content://media/2"
+        val existingUri: Uri = mockk { every { this@mockk.toString() } returns existingUriStr }
+        val newDocUri: Uri = mockk { every { this@mockk.toString() } returns newDocUriStr }
+        every { Uri.parse(existingUriStr) } returns existingUri
+        every { Uri.parse(newDocUriStr) } returns newDocUri
+        every { canonicalIdResolver.resolve(existingUri) } returns "provider::1"
+        every { canonicalIdResolver.resolve(newDocUri) } returns "provider::2"
 
-        coEvery { mediaItemDao.existsInCategory(1L, existingUri) } returns true
-        coEvery { mediaItemDao.existsInCategory(1L, newUriString) } returns false
-        coEvery { safMediaScanner.inspectSingleFile(newUri) } returns ScannedMediaFile(
-            contentUri = newUri,
-            mediaType = MediaType.IMAGE,
-            displayName = "sunset.jpg",
-            mimeType = "image/jpeg",
+        coEvery { mediaItemDao.existsByCanonicalId(1L, "provider::1") } returns true
+        coEvery { mediaItemDao.existsByCanonicalId(1L, "provider::2") } returns false
+        coEvery { safMediaScanner.inspectSingleFile(newDocUri) } returns ScannedMediaFile(
+            contentUri = newDocUri,
+            canonicalId = "provider::2",
+            mediaType = MediaType.DOCUMENT,
+            displayName = "contract.pdf",
+            mimeType = "application/pdf",
             durationMs = null,
             sizeBytes = 4096L
         )
-        coEvery {
-            thumbnailStorageManager.generateAndSaveThumbnail(newUri, MediaType.IMAGE)
-        } returns "/files/thumbnails/uuid.webp"
         coEvery { mediaItemDao.insertMediaItems(any()) } returns listOf(10L)
 
-        val result = repository.importSelectedMedia(1L, listOf(existingUri, newUriString))
+        val result = repository.importSelectedMedia(
+            categoryId = 1L,
+            uriStrings = listOf(existingUriStr, newDocUriStr)
+        )
 
         assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull())
+        assertEquals(ImportResult(importedCount = 1, skippedDuplicateCount = 1), result.getOrNull())
+        coVerify(exactly = 0) { thumbnailStorageManager.generateAndSaveThumbnail(any(), any()) }
         coVerify(exactly = 1) {
             mediaItemDao.insertMediaItems(
                 match { items ->
                     items.size == 1 &&
-                        items.first().contentUri == newUriString &&
-                        items.first().thumbnailPath == "/files/thumbnails/uuid.webp"
+                        items.first().canonicalId == "provider::2" &&
+                        items.first().thumbnailPath == "" &&
+                        items.first().mediaType == "DOCUMENT"
                 }
+            )
+        }
+    }
+
+    @Test
+    fun `importSelectedMedia deletes orphan thumbnail when insert returns -1L`() = runTest {
+        val uriStr = "content://media/3"
+        val uri: Uri = mockk { every { this@mockk.toString() } returns uriStr }
+        every { Uri.parse(uriStr) } returns uri
+        every { canonicalIdResolver.resolve(uri) } returns "provider::3"
+
+        coEvery { mediaItemDao.existsByCanonicalId(1L, "provider::3") } returns false
+        coEvery { safMediaScanner.inspectSingleFile(uri) } returns ScannedMediaFile(
+            contentUri = uri,
+            canonicalId = "provider::3",
+            mediaType = MediaType.IMAGE,
+            displayName = "photo.jpg",
+            mimeType = "image/jpeg",
+            durationMs = null,
+            sizeBytes = 2048L
+        )
+        coEvery {
+            thumbnailStorageManager.generateAndSaveThumbnail(uri, MediaType.IMAGE)
+        } returns "/files/thumbnails/orphan.webp"
+        coEvery { mediaItemDao.insertMediaItems(any()) } returns listOf(-1L)
+
+        val result = repository.importSelectedMedia(1L, listOf(uriStr))
+
+        assertTrue(result.isSuccess)
+        assertEquals(ImportResult(importedCount = 0, skippedDuplicateCount = 1), result.getOrNull())
+        coVerify(exactly = 1) { thumbnailStorageManager.deleteThumbnail("/files/thumbnails/orphan.webp") }
+    }
+
+    @Test
+    fun `importFolderMedia flattens scanned files into category and deduplicates by canonicalId`() = runTest {
+        val rootTreeStr = "content://tree/root"
+        val rootTreeUri: Uri = mockk { every { this@mockk.toString() } returns rootTreeStr }
+        val fileUri1: Uri = mockk { every { this@mockk.toString() } returns "content://tree/root/sub/doc.txt" }
+        val fileUri2: Uri = mockk { every { this@mockk.toString() } returns "content://tree/root/sub/dup.txt" }
+        every { Uri.parse(rootTreeStr) } returns rootTreeUri
+
+        val scannedFiles = listOf(
+            ScannedMediaFile(
+                contentUri = fileUri1,
+                canonicalId = "provider::doc1",
+                mediaType = MediaType.DOCUMENT,
+                displayName = "todo.txt",
+                mimeType = "text/plain",
+                durationMs = null,
+                sizeBytes = 128L
+            ),
+            ScannedMediaFile(
+                contentUri = fileUri2,
+                canonicalId = "provider::doc1",
+                mediaType = MediaType.DOCUMENT,
+                displayName = "todo.txt",
+                mimeType = "text/plain",
+                durationMs = null,
+                sizeBytes = 128L
+            )
+        )
+
+        coEvery { safMediaScanner.scanFolder(rootTreeUri) } returns scannedFiles
+        coEvery { mediaItemDao.existsByCanonicalId(1L, "provider::doc1") } returns false
+        coEvery { mediaItemDao.insertMediaItems(any()) } returns listOf(100L)
+
+        val result = repository.importFolderMedia(1L, treeUriString = rootTreeStr)
+
+        assertTrue(result.isSuccess)
+        assertEquals(ImportResult(importedCount = 1, skippedDuplicateCount = 1), result.getOrNull())
+        coVerify(exactly = 1) {
+            mediaItemDao.insertMediaItems(
+                match { it.size == 1 && it.first().categoryId == 1L }
             )
         }
     }
@@ -88,6 +170,7 @@ class MediaRepositoryImplTest {
             categoryId = 1L,
             mediaType = "VIDEO",
             contentUri = "content://media/5",
+            canonicalId = "provider::5",
             thumbnailPath = "/files/thumbnails/video.webp",
             displayName = "clip.mp4",
             mimeType = "video/mp4",

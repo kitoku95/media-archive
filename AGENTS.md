@@ -36,16 +36,20 @@ Every line of code in this repository **MUST** comply with the rules below. Do n
        - Creating a `private` Category requires entering a password.
        - **Unrestricted password format**: Any non-empty password is valid (a single character, a single digit, spaces, etc. are all accepted). **DO NOT** enforce minimum length (such as `>= 6 chars`) or complexity rules.
        - Tapping a `private` Category from the Category list always requires entering the matching password before granting access.
-4. **[HR-04] Category Detail View: 2 Separate Tabs & Square Grid**:
-   - Inside a Category, the screen has **2 separate tabs**: **Images** tab and **Videos** tab.
-   - Selecting a tab displays only that media type in a **1:1 Square Grid**.
-5. **[HR-05] Image Viewing & Video Playback Experience**:
-   - **Image Viewer**: Tapping an image opens it in **full-screen mode**, allowing navigation to the previous or next image in the same Category via **horizontal swipe gestures (left/right)**.
-   - **Video Player**: Tapping a video opens the video player, allowing navigation to the previous or next video in the same Category by **tapping the Previous / Next buttons on the controller bar**.
-6. **[HR-06] Manual Storage Browsing (Files & Folders) + SQLite Persistence**:
-   - Tapping **"Browse Storage"** lets the user pick **individual images/videos** or a **folder** from Local / External Storage:
-     - **Individual files selected**: Generate thumbnails, save thumbnail files to app-private storage, and store `content_uri` + `thumbnail_path` in SQLite.
-     - **Folder selected**: Traverse all images/videos inside that folder, generate thumbnails, and store `content_uri` + `thumbnail_path` for every discovered media file in SQLite.
+4. **[HR-04] Category Detail View: 3 Separate Tabs & Uniform Dimensions**:
+   - Inside a Category, the screen has **3 separate tabs**: **Images** tab, **Videos** tab, and **Documents** tab (Office, PDF, and text files).
+   - **Images** and **Videos** tabs render media in a **1:1 Square Grid**.
+   - **Documents** tab renders a **vertical list** where every item has an **identical fixed height (`72.dp`)**, clearly distinguishes file extensions (`.txt`, `.pdf`, `.docx`, `.xlsx`, `.pptx`, etc.) via color-coded extension badges, and truncates long filenames to a single line with ellipsis (`...`).
+   - **Category List Uniformity**: On `CategoryListScreen`, the default `Main` card and all user-created `public`/`private` Category cards **must have identical height (`72.dp`)**.
+5. **[HR-05] Image Viewing, Video Playback & External Document Opening**:
+   - **Image Viewer**: Tapping an image opens it in **full-screen mode**, allowing navigation to the previous or next image in the Category via **horizontal swipe gestures (left/right)**.
+   - **Video Player**: Tapping a video opens the video player, allowing navigation to the previous or next video in the Category by **tapping the Previous / Next buttons on the controller bar**.
+   - **Document Opener**: Tapping a document opens it via an installed external Android app (`Intent.ACTION_VIEW` with `FLAG_GRANT_READ_URI_PERMISSION`), showing a graceful Snackbar if no compatible app is installed.
+6. **[HR-06] Manual Storage Browsing (Files & Recursive Folders), Hidden/Cache Filtering, Canonical Deduplication & SQLite Persistence**:
+   - Tapping **"Browse Storage"** lets the user pick **individual files** (Images, Videos, Text, PDF, Word, Excel, PowerPoint, OpenDocument) or a **folder** from Local / External Storage:
+     - **Individual files selected**: Generate thumbnails for images/videos (skip for documents), save thumbnail files to app-private storage, and store `content_uri` + `canonical_id` + `thumbnail_path` in SQLite.
+     - **Folder selected**: Recursively traverse the folder and its nested subfolders (skipping hidden/cache folders such as `.thumbnails`, `thumbnails`, `.trash`, `.cache`, and dot-prefixed hidden files) and flatten all discovered files directly into the Category's 3 tabs (`Images`, `Videos`, `Documents`) in SQLite without rendering subfolder UI.
+     - **Canonical Deduplication**: Prevent duplicate imports within a Category using canonical SAF document identity (`authority::documentId`), clean up orphan thumbnails on conflict, and report skipped duplicates to the user.
 7. **[HR-07] UI Design, Multi-Theme, 3 Languages (`en`, `vi`, `ja`) & Concise `About` Screen**:
    - **Default Neutral Theme**: Uses a clean neutral palette of **White, Black, and Taupe (Brownish Gray)**.
    - **Additional Rich/Deep Themes**: Provide deep, tasteful accent palettes including **Deep Crimson Red**, **Deep Forest Green**, and **Deep Navy/Sapphire Blue**.
@@ -78,6 +82,7 @@ Before starting any implementation phase, read the relevant documents below:
   - [ADR-003: Category Public/Private Access & Unrestricted Password](docs/decisions/ADR-003-category-privacy-and-password.md)
   - [ADR-004: Full-screen Image Pager & Media3 Video Player](docs/decisions/ADR-004-image-pager-and-media3-video-player.md)
   - [ADR-005: Multi-Theme Palettes, Localization (`en`/`vi`/`ja`) & Concise About Screen](docs/decisions/ADR-005-theming-localization-and-about-screen.md)
+  - [ADR-006: Office Documents Tab, Explorer-Style Nested Folders, Category Card Uniformity & Canonical SAF Deduplication](docs/decisions/ADR-006-documents-folder-explorer-and-deduplication.md)
 - **Naming & Coding Conventions (`docs/standards/`)**:
   - [kotlin-android-naming-conventions.md](docs/standards/kotlin-android-naming-conventions.md)
 - **GitHub Workflow (`docs/github/`)**:

@@ -25,9 +25,9 @@ import androidx.room.PrimaryKey
             name = "index_media_items_category_id_media_type_added_at"
         ),
         Index(
-            value = ["category_id", "content_uri"],
+            value = ["category_id", "canonical_id"],
             unique = true,
-            name = "index_media_items_category_id_content_uri"
+            name = "index_media_items_category_canonical_id"
         )
     ]
 )
@@ -43,6 +43,9 @@ data class MediaItemEntity(
 
     @ColumnInfo(name = "content_uri")
     val contentUri: String,
+
+    @ColumnInfo(name = "canonical_id")
+    val canonicalId: String,
 
     @ColumnInfo(name = "thumbnail_path")
     val thumbnailPath: String,

@@ -43,41 +43,53 @@ This document defines the strict product and business constraints for **MediaArc
 
 ---
 
-## HR-04: Category Detail Layout — 2 Separate Tabs & 1:1 Square Grid
+## HR-04: Category Detail Layout — 3 Separate Tabs, Explorer Folders & Uniform Dimensions
 
 - **Required**:
-  - The Category detail screen must feature **2 distinct tabs**:
-    1. **Images Tab**
-    2. **Videos Tab**
-  - Each tab displays only its respective media type in a **Square Grid (`aspectRatio(1f)`)**.
-  - Grid cells load the cached thumbnail from `thumbnail_path`. Video grid cells display a subtle play icon and duration badge.
+  - The Category detail screen must feature **3 distinct tabs**:
+    1. **Images Tab** — 1:1 Square Grid (`aspectRatio(1f)`) showing child folders (uniform square tiles) and `IMAGE` thumbnails.
+    2. **Videos Tab** — 1:1 Square Grid (`aspectRatio(1f)`) showing child folders (uniform square tiles) and `VIDEO` thumbnails with play icon and duration badge.
+    3. **Documents Tab** — Vertical list (`LazyColumn`) showing child folders and `DOCUMENT` items (`.txt`, `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, etc.) where:
+       - Every list row has an **identical fixed height (`72.dp`)**.
+       - File extensions are clearly distinguished via color-coded extension badges.
+       - Long filenames are truncated to a single line with ellipsis (`...`).
+  - **Explorer-Style Subfolder Navigation**:
+    - Tapping a folder opens its contents (child subfolders and files) with a breadcrumb bar and Back navigation to step up levels.
+  - **Category List Card Uniformity**:
+    - On `CategoryListScreen`, the default `Main` card and all user-created `public`/`private` cards must share the exact same fixed height (`72.dp`).
 
 ---
 
-## HR-05: Full-Screen Image Viewer & Video Player Controls
+## HR-05: Full-Screen Image Viewer, Video Player Controls & External Document Opening
 
 - **Image Viewer**:
   - Tapping an image cell opens a **full-screen viewer** starting at the tapped image.
-  - Users **swipe left / right** (`HorizontalPager`) to view the next or previous image in the same Category.
+  - Users **swipe left / right** (`HorizontalPager`) to view the next or previous image in the active folder / Category.
 - **Video Player**:
   - Tapping a video cell opens the video player for that video.
-  - The **Player Controller Bar** must include **Previous** and **Next** buttons to switch directly to the previous or next video in the same Category.
+  - The **Player Controller Bar** must include **Previous** and **Next** buttons to switch directly to the previous or next video in the active folder / Category.
+- **Document Opener**:
+  - Tapping a document launches an installed external Android app via `Intent.ACTION_VIEW` with `Intent.FLAG_GRANT_READ_URI_PERMISSION`.
+  - If no app on the device can handle the file type, show a localized Snackbar notification without crashing.
 
 ---
 
-## HR-06: Storage Browsing (Single Files & Folders) + SQLite Persistence
+## HR-06: Storage Browsing (Files & Nested Folders), Canonical Deduplication & SQLite Persistence
 
-- Inside a Category, tapping **"Browse Storage"** offers two options:
-  1. **Select Images / Videos** (one or multiple individual files).
+- Inside a Category (at root or inside any opened subfolder), tapping **"Browse Storage"** offers two options:
+  1. **Select Files** (one or multiple individual images, videos, or documents: `.txt`, `.md`, `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.csv`, `.ppt`, `.pptx`, `.rtf`, `.odt`, `.ods`, `.odp`).
   2. **Select Folder** from Local or External Storage.
 - **When individual files are selected**:
   - Take persistable read permission (`takePersistableUriPermission`).
-  - Extract and save a thumbnail file to app-private storage.
-  - Save `content_uri` + `thumbnail_path` + `media_type` + `category_id` into SQLite.
+  - Extract and save a `.webp` thumbnail for `IMAGE`/`VIDEO` (skip thumbnail extraction for `DOCUMENT`, storing `thumbnail_path = ""`).
+  - Save `content_uri` + `canonical_id` + `thumbnail_path` + `media_type` + `category_id` + `folder_id` into SQLite.
 - **When a folder is selected**:
   - Take persistable read permission for the folder tree.
-  - Traverse all image and video files inside the selected folder.
-  - For each media file found: extract and save its thumbnail, and insert `content_uri` + `thumbnail_path` into SQLite under the active `category_id`.
+  - Create the selected folder itself as an `ArchiveFolder` item at the current folder level (`parent_folder_id = currentFolderId`).
+  - Recursively preserve all nested subfolders (`archive_folders`) and discovered images, videos, and documents (`media_items`) in SQLite.
+- **Canonical Deduplication**:
+  - Enforce `UNIQUE(category_id, canonical_id)` where `canonical_id` normalizes SAF URIs (`authority::documentId`) so selecting the same physical file individually and via folder import never creates duplicate entries.
+  - Clean up any newly generated thumbnail if an insert conflict occurs, and inform the user when duplicates are skipped.
 
 ---
 

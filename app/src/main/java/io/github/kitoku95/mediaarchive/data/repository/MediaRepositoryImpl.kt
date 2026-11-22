@@ -8,6 +8,7 @@ import io.github.kitoku95.mediaarchive.data.storage.SafCanonicalIdResolver
 import io.github.kitoku95.mediaarchive.data.storage.SafMediaScanner
 import io.github.kitoku95.mediaarchive.data.storage.ScannedMediaFile
 import io.github.kitoku95.mediaarchive.data.storage.ThumbnailStorageManager
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
@@ -41,6 +42,7 @@ class MediaRepositoryImpl @Inject constructor(
 
     override suspend fun importSelectedMedia(
         categoryId: Long,
+        categoryType: CategoryType,
         uriStrings: List<String>
     ): Result<ImportResult> = withContext(Dispatchers.IO) {
         runCatching {
@@ -57,7 +59,7 @@ class MediaRepositoryImpl @Inject constructor(
                     skippedDuplicates++
                     continue
                 }
-                safMediaScanner.inspectSingleFile(uri)?.let { scanned ->
+                safMediaScanner.inspectSingleFile(uri, categoryType)?.let { scanned ->
                     scannedFiles.add(scanned)
                 }
             }
@@ -72,10 +74,14 @@ class MediaRepositoryImpl @Inject constructor(
 
     override suspend fun importFolderMedia(
         categoryId: Long,
+        categoryType: CategoryType,
         treeUriString: String
     ): Result<ImportResult> = withContext(Dispatchers.IO) {
         runCatching {
-            val allScannedFiles = safMediaScanner.scanFolder(Uri.parse(treeUriString))
+            val allScannedFiles = safMediaScanner.scanFolder(
+                treeUri = Uri.parse(treeUriString),
+                categoryType = categoryType
+            )
             val seenCanonicalIds = HashSet<String>()
             var skippedDuplicates = 0
             val filesToPersist = mutableListOf<ScannedMediaFile>()

@@ -33,11 +33,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import io.github.kitoku95.mediaarchive.R
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.feature.categorylist.CreateCategoryDialogState
 import io.github.kitoku95.mediaarchive.feature.categorylist.CreateCategoryError
 
 /**
- * Dialog for creating a new `public` or `private` Category.
+ * Dialog for creating a new `public` or `private` Category of type `MEDIA` or `DOCUMENT`.
  *
  * When `Private` is selected, any non-empty password is accepted without
  * minimum length or complexity restrictions (HR-03).
@@ -46,6 +47,7 @@ import io.github.kitoku95.mediaarchive.feature.categorylist.CreateCategoryError
 fun CreateCategoryDialog(
     state: CreateCategoryDialogState,
     onNameChanged: (String) -> Unit,
+    onCategoryTypeChanged: (CategoryType) -> Unit,
     onAccessModeChanged: (AccessMode) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onConfirm: () -> Unit,
@@ -94,6 +96,36 @@ fun CreateCategoryDialog(
                         }
                     )
                 )
+
+                Text(
+                    text = stringResource(R.string.category_type_label),
+                    style = MaterialTheme.typography.labelLarge
+                )
+
+                val categoryTypes = listOf(CategoryType.MEDIA, CategoryType.DOCUMENT)
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    categoryTypes.forEachIndexed { index, type ->
+                        SegmentedButton(
+                            selected = state.categoryType == type,
+                            onClick = { if (!state.isSubmitting) onCategoryTypeChanged(type) },
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = categoryTypes.size
+                            ),
+                            label = {
+                                Text(
+                                    text = stringResource(
+                                        if (type == CategoryType.MEDIA) {
+                                            R.string.category_type_media
+                                        } else {
+                                            R.string.category_type_document
+                                        }
+                                    )
+                                )
+                            }
+                        )
+                    }
+                }
 
                 Text(
                     text = stringResource(R.string.category_access_mode_label),

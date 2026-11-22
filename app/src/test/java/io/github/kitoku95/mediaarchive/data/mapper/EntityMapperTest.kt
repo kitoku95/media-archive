@@ -3,6 +3,7 @@ package io.github.kitoku95.mediaarchive.data.mapper
 import io.github.kitoku95.mediaarchive.data.local.entity.CategoryEntity
 import io.github.kitoku95.mediaarchive.data.local.entity.MediaItemEntity
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -11,10 +12,11 @@ import org.junit.Test
 class EntityMapperTest {
 
     @Test
-    fun `CategoryEntity maps PUBLIC and PRIVATE modes accurately`() {
+    fun `CategoryEntity maps PUBLIC, PRIVATE, MEDIA, and DOCUMENT accurately`() {
         val publicEntity = CategoryEntity(
             id = 1L,
             name = "Main",
+            categoryType = "MEDIA",
             accessMode = "PUBLIC",
             passwordHash = null,
             passwordSalt = null,
@@ -23,7 +25,8 @@ class EntityMapperTest {
         )
         val privateEntity = CategoryEntity(
             id = 2L,
-            name = "Vault",
+            name = "Work Docs",
+            categoryType = "DOCUMENT",
             accessMode = "PRIVATE",
             passwordHash = "hash",
             passwordSalt = "salt",
@@ -34,12 +37,14 @@ class EntityMapperTest {
         val publicDomain = publicEntity.toDomain()
         assertEquals(1L, publicDomain.id)
         assertEquals("Main", publicDomain.name)
+        assertEquals(CategoryType.MEDIA, publicDomain.categoryType)
         assertEquals(AccessMode.PUBLIC, publicDomain.accessMode)
         assertEquals(true, publicDomain.isDefault)
 
         val privateDomain = privateEntity.toDomain()
         assertEquals(2L, privateDomain.id)
-        assertEquals("Vault", privateDomain.name)
+        assertEquals("Work Docs", privateDomain.name)
+        assertEquals(CategoryType.DOCUMENT, privateDomain.categoryType)
         assertEquals(AccessMode.PRIVATE, privateDomain.accessMode)
         assertEquals(false, privateDomain.isDefault)
     }

@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Collections
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PhotoLibrary
@@ -131,7 +132,11 @@ fun AboutScreen(
                 ) {
                     FeatureRow(
                         icon = Icons.Outlined.Collections,
-                        text = stringResource(R.string.about_feature_organize)
+                        text = stringResource(R.string.about_feature_organize_media)
+                    )
+                    FeatureRow(
+                        icon = Icons.Outlined.Description,
+                        text = stringResource(R.string.about_feature_organize_documents)
                     )
                     FeatureRow(
                         icon = Icons.Outlined.FolderOpen,

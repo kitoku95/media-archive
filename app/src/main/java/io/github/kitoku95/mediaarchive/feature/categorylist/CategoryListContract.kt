@@ -3,6 +3,7 @@ package io.github.kitoku95.mediaarchive.feature.categorylist
 import androidx.compose.runtime.Immutable
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
 import io.github.kitoku95.mediaarchive.domain.model.Category
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 
 @Immutable
 data class CategoryListUiState(
@@ -16,6 +17,7 @@ data class CategoryListUiState(
 @Immutable
 data class CreateCategoryDialogState(
     val name: String = "",
+    val categoryType: CategoryType = CategoryType.MEDIA,
     val accessMode: AccessMode = AccessMode.PUBLIC,
     val password: String = "",
     val isSubmitting: Boolean = false,
@@ -42,6 +44,7 @@ sealed interface CategoryListUiEvent {
     data object OnAddCategoryClicked : CategoryListUiEvent
     data object OnDismissCreateDialog : CategoryListUiEvent
     data class OnCreateNameChanged(val name: String) : CategoryListUiEvent
+    data class OnCreateCategoryTypeChanged(val categoryType: CategoryType) : CategoryListUiEvent
     data class OnCreateAccessModeChanged(val accessMode: AccessMode) : CategoryListUiEvent
     data class OnCreatePasswordChanged(val password: String) : CategoryListUiEvent
     data object OnConfirmCreateCategory : CategoryListUiEvent

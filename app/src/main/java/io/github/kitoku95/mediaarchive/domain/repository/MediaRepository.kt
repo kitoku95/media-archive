@@ -1,5 +1,6 @@
 package io.github.kitoku95.mediaarchive.domain.repository
 
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
@@ -17,11 +18,13 @@ interface MediaRepository {
 
     suspend fun importSelectedMedia(
         categoryId: Long,
+        categoryType: CategoryType,
         uriStrings: List<String>
     ): Result<ImportResult>
 
     suspend fun importFolderMedia(
         categoryId: Long,
+        categoryType: CategoryType,
         treeUriString: String
     ): Result<ImportResult>
 

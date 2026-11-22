@@ -6,6 +6,7 @@ import io.github.kitoku95.mediaarchive.data.local.dao.MediaItemDao
 import io.github.kitoku95.mediaarchive.data.local.entity.CategoryEntity
 import io.github.kitoku95.mediaarchive.data.storage.ThumbnailStorageManager
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -34,18 +35,28 @@ class CategoryRepositoryImplTest {
     )
 
     @Test
-    fun `ensureDefaultCategoryExists seeds Main PUBLIC category when missing`() = runTest {
-        coEvery { categoryDao.hasDefaultCategory() } returns false
-        val entitySlot = slot<CategoryEntity>()
-        coEvery { categoryDao.insertDefaultCategoryIfMissing(capture(entitySlot)) } returns 1L
+    fun `ensureDefaultCategoryExists seeds Main PUBLIC categories for both MEDIA and DOCUMENT when missing`() = runTest {
+        coEvery { categoryDao.hasDefaultCategory(CategoryType.MEDIA.name) } returns false
+        coEvery { categoryDao.hasDefaultCategory(CategoryType.DOCUMENT.name) } returns false
+        val capturedEntities = mutableListOf<CategoryEntity>()
+        coEvery { categoryDao.insertDefaultCategoryIfMissing(capture(capturedEntities)) } returns 1L
 
         repository.ensureDefaultCategoryExists()
 
-        assertEquals("Main", entitySlot.captured.name)
-        assertEquals("PUBLIC", entitySlot.captured.accessMode)
-        assertTrue(entitySlot.captured.isDefault)
-        assertNull(entitySlot.captured.passwordHash)
-        assertNull(entitySlot.captured.passwordSalt)
+        assertEquals(2, capturedEntities.size)
+        assertEquals("Main", capturedEntities[0].name)
+        assertEquals("MEDIA", capturedEntities[0].categoryType)
+        assertEquals("PUBLIC", capturedEntities[0].accessMode)
+        assertTrue(capturedEntities[0].isDefault)
+        assertNull(capturedEntities[0].passwordHash)
+        assertNull(capturedEntities[0].passwordSalt)
+
+        assertEquals("Main", capturedEntities[1].name)
+        assertEquals("DOCUMENT", capturedEntities[1].categoryType)
+        assertEquals("PUBLIC", capturedEntities[1].accessMode)
+        assertTrue(capturedEntities[1].isDefault)
+        assertNull(capturedEntities[1].passwordHash)
+        assertNull(capturedEntities[1].passwordSalt)
     }
 
     @Test
@@ -90,19 +101,21 @@ class CategoryRepositoryImplTest {
     }
 
     @Test
-    fun `createCategory with PRIVATE mode accepts 1-digit password and hashes it`() = runTest {
-        coEvery { categoryDao.getCategoryByName("Vault") } returns null
+    fun `createCategory with PRIVATE DOCUMENT mode accepts 1-digit password and hashes it`() = runTest {
+        coEvery { categoryDao.getCategoryByNameAndType("Vault", "DOCUMENT") } returns null
         val entitySlot = slot<CategoryEntity>()
         coEvery { categoryDao.insertCategory(capture(entitySlot)) } returns 3L
 
         val result = repository.createCategory(
             name = "Vault",
+            categoryType = CategoryType.DOCUMENT,
             accessMode = AccessMode.PRIVATE,
             password = "1"
         )
 
         assertTrue(result.isSuccess)
         val saved = entitySlot.captured
+        assertEquals("DOCUMENT", saved.categoryType)
         assertEquals("PRIVATE", saved.accessMode)
         assertNotNull(saved.passwordHash)
         assertNotNull(saved.passwordSalt)

@@ -27,10 +27,6 @@ object DatabaseModule {
             MediaArchiveDatabase.DATABASE_NAME
         )
             .addCallback(MediaArchiveDatabase.SEED_CALLBACK)
-            .addMigrations(
-                MediaArchiveDatabase.MIGRATION_1_2,
-                MediaArchiveDatabase.MIGRATION_2_3
-            )
             .build()
     }
 

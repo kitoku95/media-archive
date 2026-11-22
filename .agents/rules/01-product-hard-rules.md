@@ -15,24 +15,23 @@ This document defines the strict product and business constraints for **MediaArc
 
 ---
 
-## HR-02: Default `Main` Category & Mandatory Category Selection
+## HR-02: Default `Main` Categories & Mandatory Category Selection
 
 - **Required**:
-  - Upon initial database creation, the system must seed the default Category:
-    - `name`: `"Main"`
-    - `accessMode`: `PUBLIC`
-    - `isDefault`: `true`
-  - Users must select a Category from the main screen before viewing or adding any images/videos.
+  - Upon initial database creation, the system must seed two default Categories:
+    - Media default: `name = "Main"`, `categoryType = MEDIA`, `accessMode = PUBLIC`, `isDefault = true`
+    - Document default: `name = "Main"`, `categoryType = DOCUMENT`, `accessMode = PUBLIC`, `isDefault = true`
+  - Users must select a Category from the main screen before viewing or adding any images/videos/documents.
 - **Forbidden**:
-  - Do not allow deleting the default `Main` Category or changing its `isDefault` status.
+  - Do not allow deleting the default `Main` Categories or changing their `isDefault` status.
   - Never insert `media_items` without a valid `category_id` (`NOT NULL` foreign key).
 
 ---
 
-## HR-03: Category Access Modes (`public` vs `private`) & Unrestricted Passwords
+## HR-03: Category Type (`MEDIA` vs `DOCUMENT`), Access Modes (`public` vs `private`) & Unrestricted Passwords
 
 - **Creating a Category**:
-  - The user enters a unique Category name and selects either `public` or `private` mode.
+  - The user enters a Category name (unique per `category_type`), chooses the Category type (`MEDIA` or `DOCUMENT`), and selects either `public` or `private` mode.
   - If `private` is selected, a password input field is required.
 - **Password Rules for `private` Categories**:
   - **No minimum length or character restrictions**: A 1-character password (e.g., `"a"`), a 1-digit password (e.g., `"1"`), or any non-empty string (`length >= 1`) is **VALID**.
@@ -43,20 +42,24 @@ This document defines the strict product and business constraints for **MediaArc
 
 ---
 
-## HR-04: Category Detail Layout — 3 Separate Tabs, Explorer Folders & Uniform Dimensions
+## HR-04: Dedicated Category Detail Layouts & Uniform Dimensions
 
 - **Required**:
-  - The Category detail screen must feature **3 distinct tabs**:
-    1. **Images Tab** — 1:1 Square Grid (`aspectRatio(1f)`) showing child folders (uniform square tiles) and `IMAGE` thumbnails.
-    2. **Videos Tab** — 1:1 Square Grid (`aspectRatio(1f)`) showing child folders (uniform square tiles) and `VIDEO` thumbnails with play icon and duration badge.
-    3. **Documents Tab** — Vertical list (`LazyColumn`) showing child folders and `DOCUMENT` items (`.txt`, `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, etc.) where:
-       - Every list row has an **identical fixed height (`72.dp`)**.
-       - File extensions are clearly distinguished via color-coded extension badges.
-       - Long filenames are truncated to a single line with ellipsis (`...`).
-  - **Explorer-Style Subfolder Navigation**:
-    - Tapping a folder opens its contents (child subfolders and files) with a breadcrumb bar and Back navigation to step up levels.
+  - **Media Category (`CategoryType.MEDIA`)**:
+    - Displays **2 distinct tabs**:
+      1. **Images Tab** — 1:1 Square Grid (`aspectRatio(1f)`) showing `IMAGE` thumbnails.
+      2. **Videos Tab** — 1:1 Square Grid (`aspectRatio(1f)`) showing `VIDEO` thumbnails with play icon and duration badge.
+  - **Document Category (`CategoryType.DOCUMENT`)**:
+    - Displays directly as a **vertical list (`LazyColumn`)** with no tab bar, showing `DOCUMENT` items (`.txt`, `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.ppt`, `.pptx`, etc.) where:
+      - Every list row has an **identical fixed height (`72.dp`)**.
+      - File extensions are clearly distinguished via color-coded extension badges.
+      - Long filenames are truncated to a single line with ellipsis (`...`).
   - **Category List Card Uniformity**:
-    - On `CategoryListScreen`, the default `Main` card and all user-created `public`/`private` cards must share the exact same fixed height (`72.dp`).
+    - On `CategoryListScreen`, the default `Main` cards and all user-created `public`/`private` cards must share the exact same fixed height (`72.dp`) using a 4-column layout:
+      1. Private lock icon (hidden when public)
+      2. Category type icon (Folder for Media, Document for Document)
+      3. Category name (widest column)
+      4. Delete action button (hidden for default `Main` categories)
 
 ---
 
@@ -64,29 +67,29 @@ This document defines the strict product and business constraints for **MediaArc
 
 - **Image Viewer**:
   - Tapping an image cell opens a **full-screen viewer** starting at the tapped image.
-  - Users **swipe left / right** (`HorizontalPager`) to view the next or previous image in the active folder / Category.
+  - Users **swipe left / right** (`HorizontalPager`) to view the next or previous image in the Category.
 - **Video Player**:
   - Tapping a video cell opens the video player for that video.
-  - The **Player Controller Bar** must include **Previous** and **Next** buttons to switch directly to the previous or next video in the active folder / Category.
+  - The **Player Controller Bar** must include **Previous** and **Next** buttons to switch directly to the previous or next video in the Category.
 - **Document Opener**:
   - Tapping a document launches an installed external Android app via `Intent.ACTION_VIEW` with `Intent.FLAG_GRANT_READ_URI_PERMISSION`.
   - If no app on the device can handle the file type, show a localized Snackbar notification without crashing.
 
 ---
 
-## HR-06: Storage Browsing (Files & Nested Folders), Canonical Deduplication & SQLite Persistence
+## HR-06: Type-Filtered Storage Browsing (Files & Recursive Folders), Canonical Deduplication & SQLite Persistence
 
-- Inside a Category (at root or inside any opened subfolder), tapping **"Browse Storage"** offers two options:
-  1. **Select Files** (one or multiple individual images, videos, or documents: `.txt`, `.md`, `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.csv`, `.ppt`, `.pptx`, `.rtf`, `.odt`, `.ods`, `.odp`).
+- Inside a Category, tapping **"Browse Storage"** offers two options:
+  1. **Select Files** filtered to the Category's type (`image/*`, `video/*` for Media; `.txt`, `.md`, `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.csv`, `.ppt`, `.pptx`, `.rtf`, `.json`, `.xml`, `.odt`, `.ods`, `.odp` for Document).
   2. **Select Folder** from Local or External Storage.
 - **When individual files are selected**:
   - Take persistable read permission (`takePersistableUriPermission`).
+  - Keep only files matching the Category's `CategoryType`.
   - Extract and save a `.webp` thumbnail for `IMAGE`/`VIDEO` (skip thumbnail extraction for `DOCUMENT`, storing `thumbnail_path = ""`).
-  - Save `content_uri` + `canonical_id` + `thumbnail_path` + `media_type` + `category_id` + `folder_id` into SQLite.
+  - Save `content_uri` + `canonical_id` + `thumbnail_path` + `media_type` + `category_id` into SQLite.
 - **When a folder is selected**:
   - Take persistable read permission for the folder tree.
-  - Create the selected folder itself as an `ArchiveFolder` item at the current folder level (`parent_folder_id = currentFolderId`).
-  - Recursively preserve all nested subfolders (`archive_folders`) and discovered images, videos, and documents (`media_items`) in SQLite.
+  - Recursively traverse the folder and its nested subfolders, skipping hidden/cache directories (`.thumbnails`, `thumbnails`, `.trash`, `.cache`, dot-prefixed folders/files), keeping only files matching the Category's `CategoryType`, and flattening them directly into SQLite.
 - **Canonical Deduplication**:
   - Enforce `UNIQUE(category_id, canonical_id)` where `canonical_id` normalizes SAF URIs (`authority::documentId`) so selecting the same physical file individually and via folder import never creates duplicate entries.
   - Clean up any newly generated thumbnail if an insert conflict occurs, and inform the user when duplicates are skipped.

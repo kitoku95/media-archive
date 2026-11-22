@@ -26,29 +26,28 @@ Every line of code in this repository **MUST** comply with the rules below. Do n
 1. **[HR-01] No Auto-Scan Storage**:
    - The app **MUST NOT** automatically scan `MediaStore` or traverse device directories in the background on startup.
    - Images and videos are added **only** when the user explicitly taps the **"Browse Storage"** button inside a Category and selects individual files or a folder.
-2. **[HR-02] Mandatory Category Selection & Default `Main` Category**:
-   - Users **must select a Category first** before browsing or viewing images/videos.
-   - The system always initializes a default Category named `Main` with `public` access mode (`is_default = true`). The `Main` Category cannot be deleted.
-3. **[HR-03] `public` / `private` Modes & Unrestricted Password Policy**:
-   - User-created Categories allow setting a custom name and choosing either `public` or `private` mode:
-     - **`public` mode**: Tapping the Category opens its media content immediately.
+2. **[HR-02] Mandatory Category Selection & Default `Main` Categories**:
+   - Users **must select a Category first** before browsing or viewing images/videos/documents.
+   - The system always initializes two default Categories named `Main` with `public` access mode (`is_default = true`): one for **Media** (`CategoryType.MEDIA`) and one for **Documents** (`CategoryType.DOCUMENT`). Default `Main` Categories cannot be deleted.
+3. **[HR-03] Category Type (`MEDIA` / `DOCUMENT`), `public` / `private` Modes & Unrestricted Password Policy**:
+   - User-created Categories allow setting a custom name (unique per `category_type`), choosing the Category type (**Media** or **Document**), and choosing either `public` or `private` mode:
+     - **`public` mode**: Tapping the Category opens its content immediately.
      - **`private` mode**:
        - Creating a `private` Category requires entering a password.
        - **Unrestricted password format**: Any non-empty password is valid (a single character, a single digit, spaces, etc. are all accepted). **DO NOT** enforce minimum length (such as `>= 6 chars`) or complexity rules.
        - Tapping a `private` Category from the Category list always requires entering the matching password before granting access.
-4. **[HR-04] Category Detail View: 3 Separate Tabs & Uniform Dimensions**:
-   - Inside a Category, the screen has **3 separate tabs**: **Images** tab, **Videos** tab, and **Documents** tab (Office, PDF, and text files).
-   - **Images** and **Videos** tabs render media in a **1:1 Square Grid**.
-   - **Documents** tab renders a **vertical list** where every item has an **identical fixed height (`72.dp`)**, clearly distinguishes file extensions (`.txt`, `.pdf`, `.docx`, `.xlsx`, `.pptx`, etc.) via color-coded extension badges, and truncates long filenames to a single line with ellipsis (`...`).
-   - **Category List Uniformity**: On `CategoryListScreen`, the default `Main` card and all user-created `public`/`private` Category cards **must have identical height (`72.dp`)**.
+4. **[HR-04] Dedicated Category Detail Views & Uniform Dimensions**:
+   - **Media Category (`CategoryType.MEDIA`)**: Features **2 separate tabs** (**Images** and **Videos**), each rendered in a **1:1 Square Grid**.
+   - **Document Category (`CategoryType.DOCUMENT`)**: Renders directly as a **vertical list** (no tab bar) where every item has an **identical fixed height (`72.dp`)**, clearly distinguishes file extensions (`.txt`, `.pdf`, `.docx`, `.xlsx`, `.pptx`, etc.) via color-coded extension badges, and truncates long filenames to a single line with ellipsis (`...`).
+   - **Category List Uniformity**: On `CategoryListScreen`, the default `Main` cards and all user-created `public`/`private` Category cards **must have identical height (`72.dp`)** with a clean 4-column layout (private lock slot | type icon | name | delete action slot).
 5. **[HR-05] Image Viewing, Video Playback & External Document Opening**:
    - **Image Viewer**: Tapping an image opens it in **full-screen mode**, allowing navigation to the previous or next image in the Category via **horizontal swipe gestures (left/right)**.
    - **Video Player**: Tapping a video opens the video player, allowing navigation to the previous or next video in the Category by **tapping the Previous / Next buttons on the controller bar**.
    - **Document Opener**: Tapping a document opens it via an installed external Android app (`Intent.ACTION_VIEW` with `FLAG_GRANT_READ_URI_PERMISSION`), showing a graceful Snackbar if no compatible app is installed.
-6. **[HR-06] Manual Storage Browsing (Files & Recursive Folders), Hidden/Cache Filtering, Canonical Deduplication & SQLite Persistence**:
-   - Tapping **"Browse Storage"** lets the user pick **individual files** (Images, Videos, Text, PDF, Word, Excel, PowerPoint, OpenDocument) or a **folder** from Local / External Storage:
-     - **Individual files selected**: Generate thumbnails for images/videos (skip for documents), save thumbnail files to app-private storage, and store `content_uri` + `canonical_id` + `thumbnail_path` in SQLite.
-     - **Folder selected**: Recursively traverse the folder and its nested subfolders (skipping hidden/cache folders such as `.thumbnails`, `thumbnails`, `.trash`, `.cache`, and dot-prefixed hidden files) and flatten all discovered files directly into the Category's 3 tabs (`Images`, `Videos`, `Documents`) in SQLite without rendering subfolder UI.
+6. **[HR-06] Manual Storage Browsing (Type-Filtered Files & Recursive Folders), Hidden/Cache Filtering, Canonical Deduplication & SQLite Persistence**:
+   - Tapping **"Browse Storage"** lets the user pick **individual files** matching the Category's type (`image/*`, `video/*` for Media; Text, PDF, Word, Excel, PowerPoint, OpenDocument for Document) or a **folder** from Local / External Storage:
+     - **Individual files selected**: Validate against the Category's `CategoryType`, generate thumbnails for images/videos (skip for documents), save thumbnail files to app-private storage, and store `content_uri` + `canonical_id` + `thumbnail_path` in SQLite.
+     - **Folder selected**: Recursively traverse the folder and its nested subfolders (skipping hidden/cache folders such as `.thumbnails`, `thumbnails`, `.trash`, `.cache`, and dot-prefixed hidden files), filter to only files matching the Category's `CategoryType`, and flatten them directly into SQLite without rendering subfolder UI.
      - **Canonical Deduplication**: Prevent duplicate imports within a Category using canonical SAF document identity (`authority::documentId`), clean up orphan thumbnails on conflict, and report skipped duplicates to the user.
 7. **[HR-07] UI Design, Multi-Theme, 3 Languages (`en`, `vi`, `ja`) & Concise `About` Screen**:
    - **Default Neutral Theme**: Uses a clean neutral palette of **White, Black, and Taupe (Brownish Gray)**.

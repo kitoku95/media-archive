@@ -9,6 +9,7 @@ import io.github.kitoku95.mediaarchive.data.mapper.toDomain
 import io.github.kitoku95.mediaarchive.data.storage.ThumbnailStorageManager
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
 import io.github.kitoku95.mediaarchive.domain.model.Category
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.repository.CategoryRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -36,15 +37,30 @@ class CategoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun ensureDefaultCategoryExists() = withContext(Dispatchers.IO) {
-        if (!categoryDao.hasDefaultCategory()) {
+        val now = System.currentTimeMillis()
+        if (!categoryDao.hasDefaultCategory(CategoryType.MEDIA.name)) {
             categoryDao.insertDefaultCategoryIfMissing(
                 CategoryEntity(
                     name = MediaArchiveDatabase.DEFAULT_CATEGORY_NAME,
+                    categoryType = CategoryType.MEDIA.name,
                     accessMode = AccessMode.PUBLIC.name,
                     passwordHash = null,
                     passwordSalt = null,
                     isDefault = true,
-                    createdAt = System.currentTimeMillis()
+                    createdAt = now
+                )
+            )
+        }
+        if (!categoryDao.hasDefaultCategory(CategoryType.DOCUMENT.name)) {
+            categoryDao.insertDefaultCategoryIfMissing(
+                CategoryEntity(
+                    name = MediaArchiveDatabase.DEFAULT_CATEGORY_NAME,
+                    categoryType = CategoryType.DOCUMENT.name,
+                    accessMode = AccessMode.PUBLIC.name,
+                    passwordHash = null,
+                    passwordSalt = null,
+                    isDefault = true,
+                    createdAt = now + 1L
                 )
             )
         }
@@ -52,13 +68,14 @@ class CategoryRepositoryImpl @Inject constructor(
 
     override suspend fun createCategory(
         name: String,
+        categoryType: CategoryType,
         accessMode: AccessMode,
         password: String?
     ): Result<Category> = withContext(Dispatchers.IO) {
         runCatching {
             val trimmedName = name.trim()
             require(trimmedName.isNotEmpty()) { "Category name must not be blank." }
-            require(categoryDao.getCategoryByName(trimmedName) == null) {
+            require(categoryDao.getCategoryByNameAndType(trimmedName, categoryType.name) == null) {
                 "Category '$trimmedName' already exists."
             }
 
@@ -74,6 +91,7 @@ class CategoryRepositoryImpl @Inject constructor(
 
             val entity = CategoryEntity(
                 name = trimmedName,
+                categoryType = categoryType.name,
                 accessMode = accessMode.name,
                 passwordHash = hashedPassword?.hashBase64,
                 passwordSalt = hashedPassword?.saltBase64,

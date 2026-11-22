@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
@@ -25,8 +26,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Manages the state of [CategoryDetailScreen], including Images/Videos/Documents tabs
- * and manual SAF file/folder ingestion (flattening nested subfolder files directly into the category).
+ * Manages the state of [CategoryDetailScreen]:
+ * - For [CategoryType.MEDIA]: observes Images & Videos with 2 tabs and 1:1 grid display.
+ * - For [CategoryType.DOCUMENT]: observes Documents with list display.
+ * Manual SAF file/folder ingestion strictly filters items matching [categoryType].
  */
 @HiltViewModel
 class CategoryDetailViewModel @Inject constructor(
@@ -41,12 +44,15 @@ class CategoryDetailViewModel @Inject constructor(
         AppDestination.CategoryDetail(
             categoryId = savedStateHandle.get<Long>("categoryId") ?: 0L,
             categoryName = savedStateHandle.get<String>("categoryName").orEmpty(),
-            isPrivate = savedStateHandle.get<Boolean>("isPrivate") ?: false
+            isPrivate = savedStateHandle.get<Boolean>("isPrivate") ?: false,
+            categoryType = savedStateHandle.get<String>("categoryType") ?: CategoryType.MEDIA.name
         )
     } else {
         savedStateHandle.toRoute<AppDestination.CategoryDetail>()
     }
     private val categoryId: Long = route.categoryId
+    private val categoryType: CategoryType =
+        runCatching { CategoryType.valueOf(route.categoryType) }.getOrDefault(CategoryType.MEDIA)
 
     private data class LocalUiState(
         val selectedTab: MediaType = MediaType.IMAGE,
@@ -60,31 +66,54 @@ class CategoryDetailViewModel @Inject constructor(
     private val _uiEffect = Channel<CategoryDetailUiEffect>(Channel.BUFFERED)
     val uiEffect = _uiEffect.receiveAsFlow()
 
-    val uiState: StateFlow<CategoryDetailUiState> = combine(
-        getMediaByCategoryUseCase(categoryId, MediaType.IMAGE),
-        getMediaByCategoryUseCase(categoryId, MediaType.VIDEO),
-        getMediaByCategoryUseCase(categoryId, MediaType.DOCUMENT),
-        localUiState
-    ) { images, videos, documents, local ->
-        CategoryDetailUiState(
-            categoryId = categoryId,
-            categoryName = route.categoryName,
-            isPrivate = route.isPrivate,
-            selectedTab = local.selectedTab,
-            images = images,
-            videos = videos,
-            documents = documents,
-            isLoading = false,
-            isImporting = local.isImporting,
-            isBrowseSheetVisible = local.isBrowseSheetVisible,
-            deleteConfirmationItem = local.deleteConfirmationItem
-        )
+    val uiState: StateFlow<CategoryDetailUiState> = when (categoryType) {
+        CategoryType.MEDIA -> combine(
+            getMediaByCategoryUseCase(categoryId, MediaType.IMAGE),
+            getMediaByCategoryUseCase(categoryId, MediaType.VIDEO),
+            localUiState
+        ) { images, videos, local ->
+            CategoryDetailUiState(
+                categoryId = categoryId,
+                categoryName = route.categoryName,
+                categoryType = categoryType,
+                isPrivate = route.isPrivate,
+                selectedTab = local.selectedTab,
+                images = images,
+                videos = videos,
+                documents = emptyList(),
+                isLoading = false,
+                isImporting = local.isImporting,
+                isBrowseSheetVisible = local.isBrowseSheetVisible,
+                deleteConfirmationItem = local.deleteConfirmationItem
+            )
+        }
+
+        CategoryType.DOCUMENT -> combine(
+            getMediaByCategoryUseCase(categoryId, MediaType.DOCUMENT),
+            localUiState
+        ) { documents, local ->
+            CategoryDetailUiState(
+                categoryId = categoryId,
+                categoryName = route.categoryName,
+                categoryType = categoryType,
+                isPrivate = route.isPrivate,
+                selectedTab = MediaType.DOCUMENT,
+                images = emptyList(),
+                videos = emptyList(),
+                documents = documents,
+                isLoading = false,
+                isImporting = local.isImporting,
+                isBrowseSheetVisible = local.isBrowseSheetVisible,
+                deleteConfirmationItem = local.deleteConfirmationItem
+            )
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = CategoryDetailUiState(
             categoryId = categoryId,
             categoryName = route.categoryName,
+            categoryType = categoryType,
             isPrivate = route.isPrivate,
             isLoading = true
         )
@@ -97,7 +126,11 @@ class CategoryDetailViewModel @Inject constructor(
             }
 
             is CategoryDetailUiEvent.OnTabSelected -> {
-                localUiState.update { it.copy(selectedTab = event.mediaType) }
+                if (categoryType == CategoryType.MEDIA &&
+                    (event.mediaType == MediaType.IMAGE || event.mediaType == MediaType.VIDEO)
+                ) {
+                    localUiState.update { it.copy(selectedTab = event.mediaType) }
+                }
             }
 
             CategoryDetailUiEvent.OnBrowseStorageClicked -> {
@@ -110,7 +143,7 @@ class CategoryDetailViewModel @Inject constructor(
 
             CategoryDetailUiEvent.OnSelectFilesClicked -> {
                 localUiState.update { it.copy(isBrowseSheetVisible = false) }
-                _uiEffect.trySend(CategoryDetailUiEffect.LaunchFilePicker)
+                _uiEffect.trySend(CategoryDetailUiEffect.LaunchFilePicker(categoryType))
             }
 
             CategoryDetailUiEvent.OnSelectFolderClicked -> {
@@ -174,7 +207,11 @@ class CategoryDetailViewModel @Inject constructor(
         if (uris.isEmpty() || localUiState.value.isImporting) return
         viewModelScope.launch {
             localUiState.update { it.copy(isImporting = true) }
-            importSelectedMediaUseCase(categoryId = categoryId, uriStrings = uris)
+            importSelectedMediaUseCase(
+                categoryId = categoryId,
+                categoryType = categoryType,
+                uriStrings = uris
+            )
                 .onSuccess { result -> emitImportResult(result) }
                 .onFailure { _uiEffect.send(CategoryDetailUiEffect.ShowImportError) }
             localUiState.update { it.copy(isImporting = false) }
@@ -185,7 +222,11 @@ class CategoryDetailViewModel @Inject constructor(
         if (treeUri.isBlank() || localUiState.value.isImporting) return
         viewModelScope.launch {
             localUiState.update { it.copy(isImporting = true) }
-            importFolderMediaUseCase(categoryId = categoryId, treeUriString = treeUri)
+            importFolderMediaUseCase(
+                categoryId = categoryId,
+                categoryType = categoryType,
+                treeUriString = treeUri
+            )
                 .onSuccess { result -> emitImportResult(result) }
                 .onFailure { _uiEffect.send(CategoryDetailUiEffect.ShowImportError) }
             localUiState.update { it.copy(isImporting = false) }

@@ -2,6 +2,7 @@ package io.github.kitoku95.mediaarchive.feature.categorydetail
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
@@ -84,7 +85,8 @@ class CategoryDetailViewModelTest {
             mapOf(
                 "categoryId" to 10L,
                 "categoryName" to "Travel",
-                "isPrivate" to true
+                "isPrivate" to true,
+                "categoryType" to CategoryType.MEDIA.name
             )
         )
         viewModel = CategoryDetailViewModel(
@@ -102,29 +104,66 @@ class CategoryDetailViewModelTest {
     }
 
     @Test
-    fun `uiState loads separated images, videos, and documents directly for category`() = runTest {
+    fun `uiState loads separated images and videos for MEDIA category`() = runTest {
         viewModel.uiState.test {
             assertTrue(awaitItem().isLoading)
             val loaded = awaitItem()
             assertFalse(loaded.isLoading)
             assertEquals(10L, loaded.categoryId)
             assertEquals("Travel", loaded.categoryName)
+            assertEquals(CategoryType.MEDIA, loaded.categoryType)
             assertTrue(loaded.isPrivate)
             assertEquals(MediaType.IMAGE, loaded.selectedTab)
             assertEquals(listOf(sampleImage), loaded.images)
             assertEquals(listOf(sampleVideo), loaded.videos)
-            assertEquals(listOf(sampleDocument), loaded.documents)
+            assertEquals(emptyList<MediaItem>(), loaded.documents)
         }
     }
 
     @Test
-    fun `selecting document tab updates selectedTab`() = runTest {
+    fun `uiState loads only documents and launches document picker for DOCUMENT category`() = runTest {
+        val docViewModel = CategoryDetailViewModel(
+            savedStateHandle = SavedStateHandle(
+                mapOf(
+                    "categoryId" to 10L,
+                    "categoryName" to "Work Docs",
+                    "isPrivate" to false,
+                    "categoryType" to CategoryType.DOCUMENT.name
+                )
+            ),
+            getMediaByCategoryUseCase = GetMediaByCategoryUseCase(fakeRepository),
+            importSelectedMediaUseCase = ImportSelectedMediaUseCase(fakeRepository),
+            importFolderMediaUseCase = ImportFolderMediaUseCase(fakeRepository),
+            deleteMediaItemUseCase = DeleteMediaItemUseCase(fakeRepository)
+        )
+
+        docViewModel.uiState.test {
+            assertTrue(awaitItem().isLoading)
+            val loaded = awaitItem()
+            assertFalse(loaded.isLoading)
+            assertEquals(CategoryType.DOCUMENT, loaded.categoryType)
+            assertEquals(emptyList<MediaItem>(), loaded.images)
+            assertEquals(emptyList<MediaItem>(), loaded.videos)
+            assertEquals(listOf(sampleDocument), loaded.documents)
+        }
+
+        docViewModel.uiEffect.test {
+            docViewModel.onEvent(CategoryDetailUiEvent.OnSelectFilesClicked)
+            assertEquals(
+                CategoryDetailUiEffect.LaunchFilePicker(CategoryType.DOCUMENT),
+                awaitItem()
+            )
+        }
+    }
+
+    @Test
+    fun `selecting video tab updates selectedTab in MEDIA category`() = runTest {
         viewModel.uiState.test {
             awaitItem()
             awaitItem()
 
-            viewModel.onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.DOCUMENT))
-            assertEquals(MediaType.DOCUMENT, awaitItem().selectedTab)
+            viewModel.onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.VIDEO))
+            assertEquals(MediaType.VIDEO, awaitItem().selectedTab)
         }
     }
 
@@ -261,6 +300,7 @@ class CategoryDetailViewModelTest {
 
         override suspend fun importSelectedMedia(
             categoryId: Long,
+            categoryType: CategoryType,
             uriStrings: List<String>
         ): Result<ImportResult> {
             if (shouldFailImport) {
@@ -270,11 +310,11 @@ class CategoryDetailViewModelTest {
                 MediaItem(
                     id = nextId++,
                     categoryId = categoryId,
-                    mediaType = MediaType.IMAGE,
+                    mediaType = if (categoryType == CategoryType.DOCUMENT) MediaType.DOCUMENT else MediaType.IMAGE,
                     contentUri = uri,
-                    thumbnailPath = "/tmp/thumb_$nextId.webp",
-                    displayName = "imported_$nextId.jpg",
-                    mimeType = "image/jpeg",
+                    thumbnailPath = if (categoryType == CategoryType.DOCUMENT) "" else "/tmp/thumb_$nextId.webp",
+                    displayName = if (categoryType == CategoryType.DOCUMENT) "imported_$nextId.pdf" else "imported_$nextId.jpg",
+                    mimeType = if (categoryType == CategoryType.DOCUMENT) "application/pdf" else "image/jpeg",
                     durationMs = null,
                     sizeBytes = 1024L,
                     addedAt = System.currentTimeMillis()
@@ -286,6 +326,7 @@ class CategoryDetailViewModelTest {
 
         override suspend fun importFolderMedia(
             categoryId: Long,
+            categoryType: CategoryType,
             treeUriString: String
         ): Result<ImportResult> {
             if (shouldFailImport) {

@@ -1,6 +1,7 @@
 package io.github.kitoku95.mediaarchive.data.storage
 
 import android.content.Context
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -69,5 +70,22 @@ class SafMediaScannerClassificationTest {
         assertTrue(scanner.shouldSkipFile(".trashed-12345.jpg"))
         assertFalse(scanner.shouldSkipFile("IMG_001.jpg"))
         assertFalse(scanner.shouldSkipFile("report.pdf"))
+    }
+
+    @Test
+    fun `isAllowedForCategoryType separates MEDIA and DOCUMENT types strictly`() {
+        assertTrue(scanner.isAllowedForCategoryType(MediaType.IMAGE, CategoryType.MEDIA))
+        assertTrue(scanner.isAllowedForCategoryType(MediaType.VIDEO, CategoryType.MEDIA))
+        assertFalse(scanner.isAllowedForCategoryType(MediaType.DOCUMENT, CategoryType.MEDIA))
+
+        assertTrue(scanner.isAllowedForCategoryType(MediaType.DOCUMENT, CategoryType.DOCUMENT))
+        assertFalse(scanner.isAllowedForCategoryType(MediaType.IMAGE, CategoryType.DOCUMENT))
+        assertFalse(scanner.isAllowedForCategoryType(MediaType.VIDEO, CategoryType.DOCUMENT))
+    }
+
+    @Test
+    fun `resolveMediaType classifies json and xml mime types as DOCUMENT`() {
+        assertEquals(MediaType.DOCUMENT, scanner.resolveMediaType("application/json", "config"))
+        assertEquals(MediaType.DOCUMENT, scanner.resolveMediaType("application/xml", "layout"))
     }
 }

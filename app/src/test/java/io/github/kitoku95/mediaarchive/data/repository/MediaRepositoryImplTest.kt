@@ -7,6 +7,7 @@ import io.github.kitoku95.mediaarchive.data.storage.SafCanonicalIdResolver
 import io.github.kitoku95.mediaarchive.data.storage.SafMediaScanner
 import io.github.kitoku95.mediaarchive.data.storage.ScannedMediaFile
 import io.github.kitoku95.mediaarchive.data.storage.ThumbnailStorageManager
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.mockk.coEvery
@@ -59,7 +60,7 @@ class MediaRepositoryImplTest {
 
         coEvery { mediaItemDao.existsByCanonicalId(1L, "provider::1") } returns true
         coEvery { mediaItemDao.existsByCanonicalId(1L, "provider::2") } returns false
-        coEvery { safMediaScanner.inspectSingleFile(newDocUri) } returns ScannedMediaFile(
+        coEvery { safMediaScanner.inspectSingleFile(newDocUri, CategoryType.DOCUMENT) } returns ScannedMediaFile(
             contentUri = newDocUri,
             canonicalId = "provider::2",
             mediaType = MediaType.DOCUMENT,
@@ -72,6 +73,7 @@ class MediaRepositoryImplTest {
 
         val result = repository.importSelectedMedia(
             categoryId = 1L,
+            categoryType = CategoryType.DOCUMENT,
             uriStrings = listOf(existingUriStr, newDocUriStr)
         )
 
@@ -98,7 +100,7 @@ class MediaRepositoryImplTest {
         every { canonicalIdResolver.resolve(uri) } returns "provider::3"
 
         coEvery { mediaItemDao.existsByCanonicalId(1L, "provider::3") } returns false
-        coEvery { safMediaScanner.inspectSingleFile(uri) } returns ScannedMediaFile(
+        coEvery { safMediaScanner.inspectSingleFile(uri, CategoryType.MEDIA) } returns ScannedMediaFile(
             contentUri = uri,
             canonicalId = "provider::3",
             mediaType = MediaType.IMAGE,
@@ -112,7 +114,7 @@ class MediaRepositoryImplTest {
         } returns "/files/thumbnails/orphan.webp"
         coEvery { mediaItemDao.insertMediaItems(any()) } returns listOf(-1L)
 
-        val result = repository.importSelectedMedia(1L, listOf(uriStr))
+        val result = repository.importSelectedMedia(1L, CategoryType.MEDIA, listOf(uriStr))
 
         assertTrue(result.isSuccess)
         assertEquals(ImportResult(importedCount = 0, skippedDuplicateCount = 1), result.getOrNull())
@@ -148,11 +150,11 @@ class MediaRepositoryImplTest {
             )
         )
 
-        coEvery { safMediaScanner.scanFolder(rootTreeUri) } returns scannedFiles
+        coEvery { safMediaScanner.scanFolder(rootTreeUri, CategoryType.DOCUMENT) } returns scannedFiles
         coEvery { mediaItemDao.existsByCanonicalId(1L, "provider::doc1") } returns false
         coEvery { mediaItemDao.insertMediaItems(any()) } returns listOf(100L)
 
-        val result = repository.importFolderMedia(1L, treeUriString = rootTreeStr)
+        val result = repository.importFolderMedia(1L, CategoryType.DOCUMENT, treeUriString = rootTreeStr)
 
         assertTrue(result.isSuccess)
         assertEquals(ImportResult(importedCount = 1, skippedDuplicateCount = 1), result.getOrNull())

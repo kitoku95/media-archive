@@ -14,7 +14,10 @@
     <string name="category_add_button">新規カテゴリー</string>
     <string name="category_create_dialog_title">カテゴリーを作成</string>
     <string name="category_name_label">カテゴリー名</string>
-    <string name="category_name_placeholder">例: 旅行、家族</string>
+    <string name="category_name_placeholder">例: 旅行、仕事資料</string>
+    <string name="category_type_label">カテゴリー種別</string>
+    <string name="category_type_media">メディア</string>
+    <string name="category_type_document">ドキュメント</string>
     <string name="category_access_mode_label">公開設定</string>
     <string name="category_password_label">パスワード</string>
     <string name="category_password_placeholder">任意のパスワードを入力</string>
@@ -35,21 +38,24 @@
     <!-- Category Detail & SAF Browser -->
     <string name="category_detail_tab_images">画像</string>
     <string name="category_detail_tab_videos">動画</string>
-    <string name="category_detail_tab_documents">ドキュメント</string>
     <string name="category_detail_btn_browse_storage">ストレージを参照</string>
     <string name="category_detail_browse_sheet_title">カテゴリーにファイルを追加</string>
-    <string name="category_detail_browse_files">画像 / 動画 / ドキュメントを選択</string>
-    <string name="category_detail_browse_files_desc">ストレージから写真、動画、PDF、Office文書を選択します</string>
+    <string name="category_detail_browse_media_files">画像 / 動画を選択</string>
+    <string name="category_detail_browse_media_files_desc">ストレージから写真や動画を選択します</string>
+    <string name="category_detail_browse_document_files">ドキュメントを選択</string>
+    <string name="category_detail_browse_document_files_desc">PDF、テキスト、Word、Excel、PowerPoint、OpenDocumentを選択します</string>
     <string name="category_detail_browse_folder">フォルダを選択</string>
-    <string name="category_detail_browse_folder_desc">選択したフォルダとサブフォルダ内のすべての写真・動画・文書を取り込みます</string>
+    <string name="category_detail_browse_media_folder_desc">選択したフォルダとサブフォルダ内のすべての写真・動画を取り込みます</string>
+    <string name="category_detail_browse_document_folder_desc">選択したフォルダとサブフォルダ内のすべての対応ドキュメントを取り込みます</string>
     <string name="category_detail_empty_images">このカテゴリーにはまだ画像がありません。\n「ストレージを参照」をタップして追加してください。</string>
     <string name="category_detail_empty_videos">このカテゴリーにはまだ動画がありません。\n「ストレージを参照」をタップして追加してください。</string>
     <string name="category_detail_empty_documents">このカテゴリーにはまだドキュメントがありません。\n「ストレージを参照」をタップしてPDFやOffice文書を追加してください。</string>
     <string name="category_detail_importing">ファイルを取り込み、プレビューを準備しています…</string>
+    <string name="category_detail_importing_documents">ドキュメントを取り込んでいます…</string>
     <string name="category_detail_import_success">%1$d 件の項目を追加しました。</string>
     <string name="category_detail_import_with_duplicates">%1$d 件を追加しました（重複 %2$d 件をスキップ）。</string>
     <string name="category_detail_import_all_duplicates">選択した %1$d 件はすべてこのカテゴリーに登録済みです。</string>
-    <string name="category_detail_import_empty">新しい項目は追加されませんでした。</string>
+    <string name="category_detail_import_empty">追加できる対象ファイルは見つかりませんでした。</string>
     <string name="category_detail_import_error">選択した項目を取り込めませんでした。もう一度お試しください。</string>
     <string name="document_open_no_app">このドキュメントを開けるアプリがインストールされていません。</string>
     <string name="document_open_inaccessible">このドキュメントは端末ストレージ上でアクセスできなくなっています。</string>
@@ -82,9 +88,10 @@
 
     <!-- About Screen (Strict HR-07: User-facing features only, no tech jargon) -->
     <string name="about_title">アプリについて</string>
-    <string name="about_tagline">シンプルで集中できるメディア整理アプリ</string>
-    <string name="about_description">お気に入りの写真や動画を、目的に合わせたカテゴリーごとに整理して楽しめます。端末全体を自動スキャンすることなく、選んだファイルやフォルダだけを手動で追加できます。大切なコレクションはパスワード付きの非公開カテゴリーで安全に管理できます。</string>
-    <string name="about_feature_organize">写真と動画をカテゴリーごとに分かりやすく整理</string>
+    <string name="about_tagline">写真・動画・ドキュメントをすっきり整理</string>
+    <string name="about_description">写真や動画、各種ドキュメントを専用のカテゴリーに分けて整理できます。端末全体を自動スキャンすることなく、選んだファイルやフォルダだけを手動で追加できます。大切なコレクションはパスワード付きの非公開カテゴリーで安全に管理できます。</string>
+    <string name="about_feature_organize_media">写真と動画を専用メディアカテゴリーで一覧表示</string>
+    <string name="about_feature_organize_documents">PDFやOffice文書をドキュメントカテゴリーで整理</string>
     <string name="about_feature_manual">選んだファイルやフォルダだけを手動で追加</string>
     <string name="about_feature_privacy">非公開カテゴリーをパスワードで保護</string>
 
@@ -102,7 +109,7 @@
     <string name="common_delete">削除</string>
     <string name="category_delete_action">カテゴリーを削除</string>
     <string name="category_delete_dialog_title">「%1$s」を削除しますか？</string>
-    <string name="category_delete_dialog_message">このカテゴリーとアーカイブされたメディア項目がMediaArchiveから削除されます。端末上の元のファイルは削除されません。</string>
+    <string name="category_delete_dialog_message">このカテゴリーとアーカイブされた項目がMediaArchiveから削除されます。端末上の元のファイルは削除されません。</string>
     <string name="category_delete_error">カテゴリーを削除できませんでした。もう一度お試しください。</string>
     <string name="media_delete_action">メディアを削除</string>
     <string name="media_delete_dialog_title">「%1$s」を削除しますか？</string>

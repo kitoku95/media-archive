@@ -2,6 +2,7 @@ package io.github.kitoku95.mediaarchive.domain.usecase.category
 
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
 import io.github.kitoku95.mediaarchive.domain.model.Category
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.repository.CategoryRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -25,7 +26,7 @@ class CategoryUseCasesTest {
 
     @Test
     fun `getCategoriesUseCase returns repository flow`() = runTest {
-        val main = Category(1L, "Main", AccessMode.PUBLIC, isDefault = true, createdAt = 100L)
+        val main = Category(1L, "Main", CategoryType.MEDIA, AccessMode.PUBLIC, isDefault = true, createdAt = 100L)
         every { repository.observeCategories() } returns flowOf(listOf(main))
 
         val result = getCategoriesUseCase().first()
@@ -35,33 +36,33 @@ class CategoryUseCasesTest {
 
     @Test
     fun `createCategoryUseCase rejects blank name`() = runTest {
-        val result = createCategoryUseCase("   ", AccessMode.PUBLIC, null)
+        val result = createCategoryUseCase("   ", CategoryType.MEDIA, AccessMode.PUBLIC, null)
 
         assertTrue(result.isFailure)
-        coVerify(exactly = 0) { repository.createCategory(any(), any(), any()) }
+        coVerify(exactly = 0) { repository.createCategory(any(), any(), any(), any()) }
     }
 
     @Test
     fun `createCategoryUseCase rejects empty password for private category`() = runTest {
-        val result = createCategoryUseCase("Secret", AccessMode.PRIVATE, "")
+        val result = createCategoryUseCase("Secret", CategoryType.DOCUMENT, AccessMode.PRIVATE, "")
 
         assertTrue(result.isFailure)
-        coVerify(exactly = 0) { repository.createCategory(any(), any(), any()) }
+        coVerify(exactly = 0) { repository.createCategory(any(), any(), any(), any()) }
     }
 
     @Test
     fun `createCategoryUseCase accepts 1-character and 1-digit passwords for private category`() = runTest {
-        val created = Category(2L, "Secret", AccessMode.PRIVATE, isDefault = false, createdAt = 200L)
-        coEvery { repository.createCategory("Secret", AccessMode.PRIVATE, "1") } returns Result.success(created)
-        coEvery { repository.createCategory("Space", AccessMode.PRIVATE, " ") } returns Result.success(created.copy(id = 3L, name = "Space"))
+        val created = Category(2L, "Secret", CategoryType.MEDIA, AccessMode.PRIVATE, isDefault = false, createdAt = 200L)
+        coEvery { repository.createCategory("Secret", CategoryType.MEDIA, AccessMode.PRIVATE, "1") } returns Result.success(created)
+        coEvery { repository.createCategory("Space", CategoryType.DOCUMENT, AccessMode.PRIVATE, " ") } returns Result.success(created.copy(id = 3L, name = "Space", categoryType = CategoryType.DOCUMENT))
 
-        val digitResult = createCategoryUseCase("  Secret  ", AccessMode.PRIVATE, "1")
-        val spaceResult = createCategoryUseCase("Space", AccessMode.PRIVATE, " ")
+        val digitResult = createCategoryUseCase("  Secret  ", CategoryType.MEDIA, AccessMode.PRIVATE, "1")
+        val spaceResult = createCategoryUseCase("Space", CategoryType.DOCUMENT, AccessMode.PRIVATE, " ")
 
         assertTrue(digitResult.isSuccess)
         assertTrue(spaceResult.isSuccess)
-        coVerify { repository.createCategory("Secret", AccessMode.PRIVATE, "1") }
-        coVerify { repository.createCategory("Space", AccessMode.PRIVATE, " ") }
+        coVerify { repository.createCategory("Secret", CategoryType.MEDIA, AccessMode.PRIVATE, "1") }
+        coVerify { repository.createCategory("Space", CategoryType.DOCUMENT, AccessMode.PRIVATE, " ") }
     }
 
     @Test

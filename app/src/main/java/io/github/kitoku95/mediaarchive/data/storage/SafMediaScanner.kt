@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.documentfile.provider.DocumentFile
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -46,13 +47,17 @@ class SafMediaScanner @Inject constructor(
         }
     }
 
-    suspend fun inspectSingleFile(uri: Uri): ScannedMediaFile? = withContext(Dispatchers.IO) {
+    suspend fun inspectSingleFile(
+        uri: Uri,
+        categoryType: CategoryType
+    ): ScannedMediaFile? = withContext(Dispatchers.IO) {
         takePersistableReadPermission(uri)
         val (displayName, sizeBytes) = queryDisplayNameAndSize(uri)
         if (shouldSkipFile(displayName)) return@withContext null
 
         val rawMimeType = runCatching { context.contentResolver.getType(uri) }.getOrNull().orEmpty()
         val mediaType = resolveMediaType(rawMimeType, displayName) ?: return@withContext null
+        if (!isAllowedForCategoryType(mediaType, categoryType)) return@withContext null
         val effectiveMimeType = rawMimeType.ifBlank { fallbackMimeTypeForExtension(displayName) }
 
         val durationMs = if (mediaType == MediaType.VIDEO) {
@@ -73,10 +78,13 @@ class SafMediaScanner @Inject constructor(
     }
 
     /**
-     * Recursively traverses [treeUri] and returns a flat list of all supported Images, Videos,
-     * and Documents, skipping hidden/system cache folders (such as `.thumbnails`) and hidden files.
+     * Recursively traverses [treeUri] and returns a flat list of all supported files matching
+     * [categoryType], skipping hidden/system cache folders (such as `.thumbnails`) and hidden files.
      */
-    suspend fun scanFolder(treeUri: Uri): List<ScannedMediaFile> = withContext(Dispatchers.IO) {
+    suspend fun scanFolder(
+        treeUri: Uri,
+        categoryType: CategoryType
+    ): List<ScannedMediaFile> = withContext(Dispatchers.IO) {
         takePersistableReadPermission(treeUri)
         val rootDir = DocumentFile.fromTreeUri(context, treeUri) ?: return@withContext emptyList()
         if (!rootDir.exists() || !rootDir.isDirectory) {
@@ -107,6 +115,7 @@ class SafMediaScanner @Inject constructor(
                         child.type ?: context.contentResolver.getType(child.uri)
                     }.getOrNull().orEmpty()
                     val mediaType = resolveMediaType(rawMimeType, displayName) ?: continue
+                    if (!isAllowedForCategoryType(mediaType, categoryType)) continue
                     val effectiveMimeType = rawMimeType.ifBlank { fallbackMimeTypeForExtension(displayName) }
                     val sizeBytes = child.length().takeIf { it > 0L } ?: queriedSize
                     val durationMs = if (mediaType == MediaType.VIDEO) {
@@ -157,6 +166,14 @@ class SafMediaScanner @Inject constructor(
     internal fun shouldSkipFile(fileName: String?): Boolean {
         val trimmed = fileName?.trim().orEmpty()
         return trimmed.startsWith(".")
+    }
+
+    internal fun isAllowedForCategoryType(
+        mediaType: MediaType,
+        categoryType: CategoryType
+    ): Boolean = when (categoryType) {
+        CategoryType.MEDIA -> mediaType == MediaType.IMAGE || mediaType == MediaType.VIDEO
+        CategoryType.DOCUMENT -> mediaType == MediaType.DOCUMENT
     }
 
     internal fun resolveMediaType(mimeType: String, displayName: String): MediaType? {
@@ -244,6 +261,8 @@ class SafMediaScanner @Inject constructor(
         val DOCUMENT_MIME_TYPES = setOf(
             "application/pdf",
             "application/rtf",
+            "application/json",
+            "application/xml",
             "application/msword",
             "application/vnd.ms-excel",
             "application/vnd.ms-powerpoint"

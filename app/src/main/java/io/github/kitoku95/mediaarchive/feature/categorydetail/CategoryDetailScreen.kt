@@ -59,18 +59,24 @@ import io.github.kitoku95.mediaarchive.R
 import io.github.kitoku95.mediaarchive.core.security.PrivateScreenProtectionEffect
 import io.github.kitoku95.mediaarchive.data.storage.DocumentOpenOutcome
 import io.github.kitoku95.mediaarchive.data.storage.ExternalDocumentOpener
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 import io.github.kitoku95.mediaarchive.feature.categorydetail.component.BrowseStorageBottomSheet
 import io.github.kitoku95.mediaarchive.feature.categorydetail.component.DocumentListItem
 import io.github.kitoku95.mediaarchive.feature.categorydetail.component.MediaSquareGridItem
 
-private val SUPPORTED_DOCUMENT_PICKER_MIMES = arrayOf(
+private val MEDIA_PICKER_MIMES = arrayOf(
     "image/*",
-    "video/*",
+    "video/*"
+)
+
+private val DOCUMENT_PICKER_MIMES = arrayOf(
     "text/*",
     "application/pdf",
     "application/rtf",
+    "application/json",
+    "application/xml",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/vnd.oasis.opendocument.text",
@@ -121,8 +127,12 @@ fun CategoryDetailRoute(
         viewModel.uiEffect.collect { effect ->
             when (effect) {
                 CategoryDetailUiEffect.NavigateBack -> onNavigateBack()
-                CategoryDetailUiEffect.LaunchFilePicker -> {
-                    openMultipleDocumentsLauncher.launch(SUPPORTED_DOCUMENT_PICKER_MIMES)
+                is CategoryDetailUiEffect.LaunchFilePicker -> {
+                    val mimeTypes = when (effect.categoryType) {
+                        CategoryType.MEDIA -> MEDIA_PICKER_MIMES
+                        CategoryType.DOCUMENT -> DOCUMENT_PICKER_MIMES
+                    }
+                    openMultipleDocumentsLauncher.launch(mimeTypes)
                 }
                 CategoryDetailUiEffect.LaunchFolderPicker -> {
                     openDocumentTreeLauncher.launch(null)
@@ -223,16 +233,10 @@ fun CategoryDetailScreen(
     onEvent: (CategoryDetailUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val activeItems = when (uiState.selectedTab) {
-        MediaType.IMAGE -> uiState.images
-        MediaType.VIDEO -> uiState.videos
-        MediaType.DOCUMENT -> uiState.documents
-    }
-    val selectedTabIndex = when (uiState.selectedTab) {
-        MediaType.IMAGE -> 0
-        MediaType.VIDEO -> 1
-        MediaType.DOCUMENT -> 2
-    }
+    val isMediaCategory = uiState.categoryType == CategoryType.MEDIA
+    val activeMediaTab = if (uiState.selectedTab == MediaType.VIDEO) MediaType.VIDEO else MediaType.IMAGE
+    val selectedTabIndex = if (activeMediaTab == MediaType.VIDEO) 1 else 0
+    val activeMediaItems = if (activeMediaTab == MediaType.VIDEO) uiState.videos else uiState.images
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -289,46 +293,43 @@ fun CategoryDetailScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
-                Tab(
-                    selected = uiState.selectedTab == MediaType.IMAGE,
-                    onClick = { onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.IMAGE)) },
-                    text = {
-                        Text(
-                            text = "${stringResource(R.string.category_detail_tab_images)} (${uiState.images.size})",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                )
-                Tab(
-                    selected = uiState.selectedTab == MediaType.VIDEO,
-                    onClick = { onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.VIDEO)) },
-                    text = {
-                        Text(
-                            text = "${stringResource(R.string.category_detail_tab_videos)} (${uiState.videos.size})",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                )
-                Tab(
-                    selected = uiState.selectedTab == MediaType.DOCUMENT,
-                    onClick = { onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.DOCUMENT)) },
-                    text = {
-                        Text(
-                            text = "${stringResource(R.string.category_detail_tab_documents)} (${uiState.documents.size})",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                )
+            if (isMediaCategory) {
+                PrimaryTabRow(selectedTabIndex = selectedTabIndex) {
+                    Tab(
+                        selected = activeMediaTab == MediaType.IMAGE,
+                        onClick = { onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.IMAGE)) },
+                        text = {
+                            Text(
+                                text = "${stringResource(R.string.category_detail_tab_images)} (${uiState.images.size})",
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    )
+                    Tab(
+                        selected = activeMediaTab == MediaType.VIDEO,
+                        onClick = { onEvent(CategoryDetailUiEvent.OnTabSelected(MediaType.VIDEO)) },
+                        text = {
+                            Text(
+                                text = "${stringResource(R.string.category_detail_tab_videos)} (${uiState.videos.size})",
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    )
+                }
             }
 
             if (uiState.isImporting) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 Text(
-                    text = stringResource(R.string.category_detail_importing),
+                    text = stringResource(
+                        if (isMediaCategory) {
+                            R.string.category_detail_importing
+                        } else {
+                            R.string.category_detail_importing_documents
+                        }
+                    ),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
@@ -345,28 +346,32 @@ fun CategoryDetailScreen(
                     }
                 }
 
-                activeItems.isEmpty() -> {
-                    EmptyMediaTabState(selectedTab = uiState.selectedTab)
+                !isMediaCategory -> {
+                    if (uiState.documents.isEmpty()) {
+                        EmptyMediaTabState(selectedTab = MediaType.DOCUMENT)
+                    } else {
+                        DocumentList(
+                            items = uiState.documents,
+                            onDocumentClick = { item ->
+                                onEvent(CategoryDetailUiEvent.OnDocumentClicked(item))
+                            },
+                            onDocumentLongClick = { item ->
+                                onEvent(CategoryDetailUiEvent.OnDeleteMediaClicked(item))
+                            }
+                        )
+                    }
                 }
 
-                uiState.selectedTab == MediaType.DOCUMENT -> {
-                    DocumentList(
-                        items = activeItems,
-                        onDocumentClick = { item ->
-                            onEvent(CategoryDetailUiEvent.OnDocumentClicked(item))
-                        },
-                        onDocumentLongClick = { item ->
-                            onEvent(CategoryDetailUiEvent.OnDeleteMediaClicked(item))
-                        }
-                    )
+                activeMediaItems.isEmpty() -> {
+                    EmptyMediaTabState(selectedTab = activeMediaTab)
                 }
 
                 else -> {
                     MediaSquareGrid(
-                        items = activeItems,
-                        selectedTab = uiState.selectedTab,
+                        items = activeMediaItems,
+                        selectedTab = activeMediaTab,
                         onItemClick = { item, index ->
-                            when (uiState.selectedTab) {
+                            when (activeMediaTab) {
                                 MediaType.IMAGE -> onEvent(
                                     CategoryDetailUiEvent.OnImageClicked(item.id, index)
                                 )
@@ -387,6 +392,7 @@ fun CategoryDetailScreen(
 
     if (uiState.isBrowseSheetVisible) {
         BrowseStorageBottomSheet(
+            categoryType = uiState.categoryType,
             onSelectFiles = { onEvent(CategoryDetailUiEvent.OnSelectFilesClicked) },
             onSelectFolder = { onEvent(CategoryDetailUiEvent.OnSelectFolderClicked) },
             onDismiss = { onEvent(CategoryDetailUiEvent.OnDismissBrowseSheet) }

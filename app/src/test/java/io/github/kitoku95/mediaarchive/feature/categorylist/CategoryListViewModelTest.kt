@@ -3,6 +3,7 @@ package io.github.kitoku95.mediaarchive.feature.categorylist
 import app.cash.turbine.test
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
 import io.github.kitoku95.mediaarchive.domain.model.Category
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.repository.CategoryRepository
 import io.github.kitoku95.mediaarchive.domain.usecase.category.CreateCategoryUseCase
 import io.github.kitoku95.mediaarchive.domain.usecase.category.DeleteCategoryUseCase
@@ -130,6 +131,8 @@ class CategoryListViewModelTest {
 
             viewModel.onEvent(CategoryListUiEvent.OnCreateNameChanged("Diary"))
             awaitItem()
+            viewModel.onEvent(CategoryListUiEvent.OnCreateCategoryTypeChanged(CategoryType.DOCUMENT))
+            awaitItem()
             viewModel.onEvent(CategoryListUiEvent.OnCreateAccessModeChanged(AccessMode.PRIVATE))
             awaitItem()
             viewModel.onEvent(CategoryListUiEvent.OnCreatePasswordChanged("a"))
@@ -139,7 +142,13 @@ class CategoryListViewModelTest {
 
             val updated = expectMostRecentItem()
             assertNull(updated.createDialog)
-            assertTrue(updated.categories.any { it.name == "Diary" && it.accessMode == AccessMode.PRIVATE })
+            assertTrue(
+                updated.categories.any {
+                    it.name == "Diary" &&
+                        it.categoryType == CategoryType.DOCUMENT &&
+                        it.accessMode == AccessMode.PRIVATE
+                }
+            )
         }
     }
 
@@ -209,16 +218,18 @@ class CategoryListViewModelTest {
 
         override suspend fun createCategory(
             name: String,
+            categoryType: CategoryType,
             accessMode: AccessMode,
             password: String?
         ): Result<Category> {
             val trimmed = name.trim()
-            if (categoriesFlow.value.any { it.name.equals(trimmed, ignoreCase = true) }) {
+            if (categoriesFlow.value.any { it.name.equals(trimmed, ignoreCase = true) && it.categoryType == categoryType }) {
                 return Result.failure(IllegalArgumentException("Category '$trimmed' already exists."))
             }
             val created = Category(
                 id = nextId++,
                 name = trimmed,
+                categoryType = categoryType,
                 accessMode = accessMode,
                 isDefault = false,
                 createdAt = System.currentTimeMillis()

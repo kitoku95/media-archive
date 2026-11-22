@@ -2,6 +2,7 @@ package io.github.kitoku95.mediaarchive.feature.videoplayer
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.ImportResult
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
@@ -175,11 +176,13 @@ class VideoPlayerViewModelTest {
 
         override suspend fun importSelectedMedia(
             categoryId: Long,
+            categoryType: CategoryType,
             uriStrings: List<String>
         ): Result<ImportResult> = Result.success(ImportResult(0, 0))
 
         override suspend fun importFolderMedia(
             categoryId: Long,
+            categoryType: CategoryType,
             treeUriString: String
         ): Result<ImportResult> = Result.success(ImportResult(0, 0))
 

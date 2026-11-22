@@ -19,11 +19,11 @@ interface CategoryDao {
     @Query("SELECT * FROM categories WHERE id = :id LIMIT 1")
     suspend fun getCategoryById(id: Long): CategoryEntity?
 
-    @Query("SELECT * FROM categories WHERE name = :name COLLATE NOCASE LIMIT 1")
-    suspend fun getCategoryByName(name: String): CategoryEntity?
+    @Query("SELECT * FROM categories WHERE name = :name COLLATE NOCASE AND category_type = :categoryType LIMIT 1")
+    suspend fun getCategoryByNameAndType(name: String, categoryType: String): CategoryEntity?
 
-    @Query("SELECT EXISTS(SELECT 1 FROM categories WHERE is_default = 1)")
-    suspend fun hasDefaultCategory(): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM categories WHERE is_default = 1 AND category_type = :categoryType)")
+    suspend fun hasDefaultCategory(categoryType: String): Boolean
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertCategory(entity: CategoryEntity): Long

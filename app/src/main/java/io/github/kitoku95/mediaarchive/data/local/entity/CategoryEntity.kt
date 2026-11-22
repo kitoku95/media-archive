@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 
 /**
  * Room entity representing a row in the `categories` SQLite table.
@@ -11,7 +12,7 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "categories",
     indices = [
-        Index(value = ["name"], unique = true)
+        Index(value = ["name", "category_type"], unique = true)
     ]
 )
 data class CategoryEntity(
@@ -20,6 +21,9 @@ data class CategoryEntity(
 
     @ColumnInfo(name = "name", collate = ColumnInfo.NOCASE)
     val name: String,
+
+    @ColumnInfo(name = "category_type", defaultValue = "MEDIA")
+    val categoryType: String = CategoryType.MEDIA.name,
 
     @ColumnInfo(name = "access_mode")
     val accessMode: String,

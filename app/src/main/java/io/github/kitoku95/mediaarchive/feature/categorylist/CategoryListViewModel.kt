@@ -73,6 +73,12 @@ class CategoryListViewModel @Inject constructor(
                     error = null
                 )
             }
+            is CategoryListUiEvent.OnCreateCategoryTypeChanged -> {
+                createDialogState.value = createDialogState.value?.copy(
+                    categoryType = event.categoryType,
+                    error = null
+                )
+            }
             is CategoryListUiEvent.OnCreateAccessModeChanged -> {
                 createDialogState.value = createDialogState.value?.copy(
                     accessMode = event.accessMode,
@@ -150,6 +156,7 @@ class CategoryListViewModel @Inject constructor(
         viewModelScope.launch {
             val result = createCategoryUseCase(
                 name = trimmedName,
+                categoryType = current.categoryType,
                 accessMode = current.accessMode,
                 password = if (current.accessMode == AccessMode.PRIVATE) current.password else null
             )

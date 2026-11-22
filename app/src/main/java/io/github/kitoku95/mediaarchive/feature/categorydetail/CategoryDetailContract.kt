@@ -1,6 +1,7 @@
 package io.github.kitoku95.mediaarchive.feature.categorydetail
 
 import androidx.compose.runtime.Immutable
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import io.github.kitoku95.mediaarchive.domain.model.MediaItem
 import io.github.kitoku95.mediaarchive.domain.model.MediaType
 
@@ -11,6 +12,7 @@ import io.github.kitoku95.mediaarchive.domain.model.MediaType
 data class CategoryDetailUiState(
     val categoryId: Long = 0L,
     val categoryName: String = "",
+    val categoryType: CategoryType = CategoryType.MEDIA,
     val isPrivate: Boolean = false,
     val selectedTab: MediaType = MediaType.IMAGE,
     val images: List<MediaItem> = emptyList(),
@@ -47,7 +49,7 @@ sealed interface CategoryDetailUiEvent {
  */
 sealed interface CategoryDetailUiEffect {
     data object NavigateBack : CategoryDetailUiEffect
-    data object LaunchFilePicker : CategoryDetailUiEffect
+    data class LaunchFilePicker(val categoryType: CategoryType) : CategoryDetailUiEffect
     data object LaunchFolderPicker : CategoryDetailUiEffect
     data class NavigateToImageViewer(
         val categoryId: Long,

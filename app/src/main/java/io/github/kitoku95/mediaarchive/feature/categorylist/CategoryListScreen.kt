@@ -163,6 +163,7 @@ fun CategoryListScreen(
         CreateCategoryDialog(
             state = dialogState,
             onNameChanged = { onEvent(CategoryListUiEvent.OnCreateNameChanged(it)) },
+            onCategoryTypeChanged = { onEvent(CategoryListUiEvent.OnCreateCategoryTypeChanged(it)) },
             onAccessModeChanged = { onEvent(CategoryListUiEvent.OnCreateAccessModeChanged(it)) },
             onPasswordChanged = { onEvent(CategoryListUiEvent.OnCreatePasswordChanged(it)) },
             onConfirm = { onEvent(CategoryListUiEvent.OnConfirmCreateCategory) },

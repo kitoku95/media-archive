@@ -1,5 +1,6 @@
 package io.github.kitoku95.mediaarchive.navigation
 
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import kotlinx.serialization.Serializable
 
 /**
@@ -13,7 +14,8 @@ sealed interface AppDestination {
     data class CategoryDetail(
         val categoryId: Long,
         val categoryName: String,
-        val isPrivate: Boolean
+        val isPrivate: Boolean,
+        val categoryType: String = CategoryType.MEDIA.name
     ) : AppDestination
 
     @Serializable

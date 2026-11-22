@@ -2,6 +2,7 @@ package io.github.kitoku95.mediaarchive.domain.repository
 
 import io.github.kitoku95.mediaarchive.domain.model.AccessMode
 import io.github.kitoku95.mediaarchive.domain.model.Category
+import io.github.kitoku95.mediaarchive.domain.model.CategoryType
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -17,6 +18,7 @@ interface CategoryRepository {
 
     suspend fun createCategory(
         name: String,
+        categoryType: CategoryType,
         accessMode: AccessMode,
         password: String?
     ): Result<Category>

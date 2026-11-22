@@ -34,7 +34,8 @@ fun AppNavHost(
                         AppDestination.CategoryDetail(
                             categoryId = category.id,
                             categoryName = category.name,
-                            isPrivate = category.accessMode == AccessMode.PRIVATE
+                            isPrivate = category.accessMode == AccessMode.PRIVATE,
+                            categoryType = category.categoryType.name
                         )
                     )
                 },

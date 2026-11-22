@@ -14,7 +14,10 @@
     <string name="category_add_button">Tạo danh mục</string>
     <string name="category_create_dialog_title">Tạo danh mục mới</string>
     <string name="category_name_label">Tên danh mục</string>
-    <string name="category_name_placeholder">VD: Du lịch, Gia đình</string>
+    <string name="category_name_placeholder">VD: Du lịch, Tài liệu công việc</string>
+    <string name="category_type_label">Loại danh mục</string>
+    <string name="category_type_media">Ảnh / Video</string>
+    <string name="category_type_document">Tài liệu</string>
     <string name="category_access_mode_label">Chế độ truy cập</string>
     <string name="category_password_label">Mật khẩu</string>
     <string name="category_password_placeholder">Nhập mật khẩu bất kỳ (không giới hạn độ dài)</string>
@@ -35,21 +38,24 @@
     <!-- Category Detail & SAF Browser -->
     <string name="category_detail_tab_images">Ảnh</string>
     <string name="category_detail_tab_videos">Video</string>
-    <string name="category_detail_tab_documents">Tài liệu</string>
     <string name="category_detail_btn_browse_storage">Duyệt bộ nhớ</string>
     <string name="category_detail_browse_sheet_title">Thêm tệp vào danh mục</string>
-    <string name="category_detail_browse_files">Chọn Ảnh / Video / Tài liệu</string>
-    <string name="category_detail_browse_files_desc">Chọn ảnh, video, PDF hoặc tài liệu văn phòng từ bộ nhớ</string>
+    <string name="category_detail_browse_media_files">Chọn Ảnh / Video</string>
+    <string name="category_detail_browse_media_files_desc">Chọn ảnh hoặc video từ bộ nhớ thiết bị</string>
+    <string name="category_detail_browse_document_files">Chọn Tài liệu</string>
+    <string name="category_detail_browse_document_files_desc">Chọn PDF, văn bản, Word, Excel, PowerPoint hoặc OpenDocument</string>
     <string name="category_detail_browse_folder">Chọn Thư mục</string>
-    <string name="category_detail_browse_folder_desc">Nhập tất cả ảnh, video và tài liệu trong thư mục và các thư mục con</string>
+    <string name="category_detail_browse_media_folder_desc">Nhập tất cả ảnh và video trong thư mục và các thư mục con</string>
+    <string name="category_detail_browse_document_folder_desc">Nhập tất cả tài liệu hỗ trợ trong thư mục và các thư mục con</string>
     <string name="category_detail_empty_images">Chưa có ảnh nào trong danh mục này.\nNhấn Duyệt bộ nhớ để thêm ảnh hoặc thư mục.</string>
     <string name="category_detail_empty_videos">Chưa có video nào trong danh mục này.\nNhấn Duyệt bộ nhớ để thêm video hoặc thư mục.</string>
     <string name="category_detail_empty_documents">Chưa có tài liệu nào trong danh mục này.\nNhấn Duyệt bộ nhớ để thêm PDF, văn bản hoặc tệp văn phòng.</string>
     <string name="category_detail_importing">Đang nhập tệp &amp; chuẩn bị bản xem trước…</string>
+    <string name="category_detail_importing_documents">Đang nhập tài liệu…</string>
     <string name="category_detail_import_success">Đã thêm %1$d mục.</string>
     <string name="category_detail_import_with_duplicates">Đã thêm %1$d mục (bỏ qua %2$d mục trùng lặp).</string>
     <string name="category_detail_import_all_duplicates">Tất cả %1$d mục đã chọn đều đã có trong danh mục này.</string>
-    <string name="category_detail_import_empty">Không có mục mới nào được thêm.</string>
+    <string name="category_detail_import_empty">Không tìm thấy tệp phù hợp mới nào để thêm.</string>
     <string name="category_detail_import_error">Không thể nhập các mục đã chọn. Vui lòng thử lại.</string>
     <string name="document_open_no_app">Không có ứng dụng nào trên thiết bị có thể mở tài liệu này.</string>
     <string name="document_open_inaccessible">Tài liệu này không còn truy cập được trên bộ nhớ thiết bị.</string>
@@ -82,9 +88,10 @@
 
     <!-- About Screen (Strict HR-07: User-facing features only, no tech jargon) -->
     <string name="about_title">Giới thiệu</string>
-    <string name="about_tagline">Không gian lưu trữ và xem ảnh, video gọn gàng</string>
-    <string name="about_description">Sắp xếp và thưởng thức ảnh, video cá nhân theo từng danh mục riêng biệt phù hợp với nhu cầu của bạn. Chỉ thêm những tệp hoặc thư mục bạn trực tiếp lựa chọn mà không tự động quét toàn bộ thiết bị. Bảo vệ các bộ sưu tập nhạy cảm trong danh mục riêng tư bằng mật khẩu của riêng bạn.</string>
-    <string name="about_feature_organize">Phân loại ảnh và video theo từng danh mục rõ ràng</string>
+    <string name="about_tagline">Không gian lưu trữ ảnh, video và tài liệu gọn gàng</string>
+    <string name="about_description">Sắp xếp ảnh, video và tài liệu cá nhân trong các danh mục tách biệt phù hợp với nhu cầu của bạn. Chỉ thêm những tệp hoặc thư mục bạn trực tiếp lựa chọn mà không tự động quét toàn bộ thiết bị. Bảo vệ các bộ sưu tập nhạy cảm trong danh mục riêng tư bằng mật khẩu của riêng bạn.</string>
+    <string name="about_feature_organize_media">Xem ảnh và video gọn gàng trong danh mục Ảnh / Video riêng biệt</string>
+    <string name="about_feature_organize_documents">Lưu trữ và mở nhanh PDF, văn bản, tệp văn phòng trong danh mục Tài liệu</string>
     <string name="about_feature_manual">Chủ động chọn lọc từng tệp hoặc thư mục muốn thêm</string>
     <string name="about_feature_privacy">Khóa các danh mục riêng tư bằng mật khẩu cá nhân</string>
 

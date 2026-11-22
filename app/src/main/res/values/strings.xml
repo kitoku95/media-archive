@@ -14,7 +14,10 @@
     <string name="category_add_button">New Category</string>
     <string name="category_create_dialog_title">Create Category</string>
     <string name="category_name_label">Category Name</string>
-    <string name="category_name_placeholder">e.g. Travel, Family</string>
+    <string name="category_name_placeholder">e.g. Travel, Work Docs</string>
+    <string name="category_type_label">Category Type</string>
+    <string name="category_type_media">Media</string>
+    <string name="category_type_document">Document</string>
     <string name="category_access_mode_label">Access Mode</string>
     <string name="category_password_label">Password</string>
     <string name="category_password_placeholder">Enter any non-empty password</string>
@@ -35,21 +38,24 @@
     <!-- Category Detail & SAF Browser -->
     <string name="category_detail_tab_images">Images</string>
     <string name="category_detail_tab_videos">Videos</string>
-    <string name="category_detail_tab_documents">Documents</string>
     <string name="category_detail_btn_browse_storage">Browse Storage</string>
     <string name="category_detail_browse_sheet_title">Add Files to Category</string>
-    <string name="category_detail_browse_files">Select Media / Documents</string>
-    <string name="category_detail_browse_files_desc">Pick photos, videos, PDFs, or office documents from storage</string>
+    <string name="category_detail_browse_media_files">Select Photos / Videos</string>
+    <string name="category_detail_browse_media_files_desc">Pick photos or videos from device storage</string>
+    <string name="category_detail_browse_document_files">Select Documents</string>
+    <string name="category_detail_browse_document_files_desc">Pick PDF, text, Word, Excel, PowerPoint, or OpenDocument files</string>
     <string name="category_detail_browse_folder">Select Folder</string>
-    <string name="category_detail_browse_folder_desc">Import all photos, videos, and documents inside a chosen folder and its subfolders</string>
+    <string name="category_detail_browse_media_folder_desc">Import all photos and videos inside a chosen folder and its subfolders</string>
+    <string name="category_detail_browse_document_folder_desc">Import all supported documents inside a chosen folder and its subfolders</string>
     <string name="category_detail_empty_images">No images in this category yet.\nTap Browse Storage to add photos or a folder.</string>
     <string name="category_detail_empty_videos">No videos in this category yet.\nTap Browse Storage to add videos or a folder.</string>
     <string name="category_detail_empty_documents">No documents in this category yet.\nTap Browse Storage to add PDF, text, or office files.</string>
     <string name="category_detail_importing">Importing files &amp; preparing previews…</string>
+    <string name="category_detail_importing_documents">Importing documents…</string>
     <string name="category_detail_import_success">Added %1$d item(s).</string>
     <string name="category_detail_import_with_duplicates">Added %1$d item(s) (%2$d duplicate(s) skipped).</string>
     <string name="category_detail_import_all_duplicates">All %1$d selected item(s) are already in this category.</string>
-    <string name="category_detail_import_empty">No new items were added.</string>
+    <string name="category_detail_import_empty">No new matching items were found to add.</string>
     <string name="category_detail_import_error">Could not import selected items. Please try again.</string>
     <string name="document_open_no_app">No installed app can open this document.</string>
     <string name="document_open_inaccessible">This document is no longer accessible on device storage.</string>
@@ -82,9 +88,10 @@
 
     <!-- About Screen (Strict HR-07: User-facing features only, no tech jargon) -->
     <string name="about_title">About</string>
-    <string name="about_tagline">Your personal, distraction-free media organizer</string>
-    <string name="about_description">Organize and enjoy your personal photos and videos in custom categories tailored to your needs. Add only the specific files or folders you choose without automatic background scanning. Keep sensitive collections protected in private categories with your own password.</string>
-    <string name="about_feature_organize">Organize photos and videos into dedicated categories</string>
+    <string name="about_tagline">Your personal organizer for photos, videos, and documents</string>
+    <string name="about_description">Organize your personal photos, videos, and documents in dedicated categories tailored to your needs. Add only the specific files or folders you choose without automatic background scanning. Keep sensitive collections protected in private categories with your own password.</string>
+    <string name="about_feature_organize_media">Browse photos and videos in dedicated media categories</string>
+    <string name="about_feature_organize_documents">Keep PDFs, text, and office files organized in document categories</string>
     <string name="about_feature_manual">Browse and add only the files or folders you select</string>
     <string name="about_feature_privacy">Lock private categories with a personal password</string>
 
@@ -102,7 +109,7 @@
     <string name="common_delete">Delete</string>
     <string name="category_delete_action">Delete category</string>
     <string name="category_delete_dialog_title">Delete %1$s?</string>
-    <string name="category_delete_dialog_message">This will remove the category and all archived media entries from MediaArchive. Your original files on device storage will not be deleted.</string>
+    <string name="category_delete_dialog_message">This will remove the category and all archived items from MediaArchive. Your original files on device storage will not be deleted.</string>
     <string name="category_delete_error">Could not delete category. Please try again.</string>
     <string name="media_delete_action">Remove media</string>
     <string name="media_delete_dialog_title">Remove %1$s?</string>
